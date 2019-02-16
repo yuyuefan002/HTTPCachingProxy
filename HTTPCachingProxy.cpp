@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
     if ((pid = fork() == 0)) {
       std::cout << "new request" << std::endl;
       std::string HTTPRequest = server.receiveHTTPRequest(newfd);
-      handleHTTPRequest();
+      std::cout << HTTPRequest; // handleHTTPRequest();
       close(newfd);
       _exit(EXIT_SUCCESS);
     }
