@@ -42,5 +42,50 @@ int Server::acceptNewConn() {
   }
   return newfd;
 }
+std::string Server::recvall(int fd) {
+  std::string msg;
+  while (msg.find("\r\n\r\n") == std::string::npos) {
+    char buf[MAXDATASIZE] = "";
+    int nbytes;
+    if ((nbytes = recv(fd, buf, MAXDATASIZE - 1, 0)) == -1) {
+      std::cerr << "recv failed\n";
+      exit(EXIT_FAILURE);
+    } else {
+      buf[nbytes] = '\0';
+      msg += buf;
+    }
+  }
+  return msg;
+}
 
+int Server::sendall(int fd, const char *buf, size_t *len) {
+  size_t total = 0;     // how many bytes we've sent
+  int bytesleft = *len; // how many we have left to send
+  int n;
+
+  while (total < *len) {
+    if ((n = send(fd, buf + total, bytesleft, 0)) == -1) {
+      break;
+    }
+    total += n;
+    bytesleft -= n;
+  }
+
+  *len = total; // return number actually sent here
+
+  return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
+}
+std::string Server::receiveHTTPRequest(int fd) { return recvall(fd); }
+void Server::sendData(int fd, std::string msg) {
+  size_t sent = 0;
+  size_t len = msg.length();
+  size_t max = msg.length();
+  while (sent < len) {
+    sent = len - sent;
+    len = sent;
+    if (sendall(fd, msg.substr(max - len).c_str(), &sent) == -1) {
+      std::cerr << "send failed\n";
+    }
+  }
+}
 Server::~Server() { close(listener); }
