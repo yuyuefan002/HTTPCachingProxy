@@ -65,7 +65,7 @@ int HTTParser::verifyHeader() {
   }
   return 0;
 }
-HTTParser::HTTParser(std::string HTTPRequest) {
+HTTParser::HTTParser(std::string r) : HTTPRequest(r) {
   errnum = 0;
   int target = HTTPRequest.find("\r\n");
   std::string request = HTTPRequest.substr(0, target);
@@ -86,6 +86,8 @@ HTTParser::~HTTParser() {}
  *
  */
 int HTTParser::errorDetection() { return errnum; }
+std::string HTTParser::getHostName() { return host; }
+std::string HTTParser::getHostPort() { return port; }
 /*
 int main() {
   std::string HTTPRequest = "GET /awesome.txt HTTP/1.1\r\nHost: "

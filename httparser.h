@@ -6,6 +6,7 @@
 class HTTParser {
 private:
   int errnum;
+  std::string HTTPRequest;
   std::string method;
   std::string protocol;
   std::string path;
@@ -19,8 +20,10 @@ private:
   int verifyHeader();
 
 public:
-  HTTParser(std::string HTTPRequest);
+  HTTParser(std::string r);
   ~HTTParser();
   int errorDetection();
+  std::string getHostName();
+  std::string getHostPort();
 };
 #endif

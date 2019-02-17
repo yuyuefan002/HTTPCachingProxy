@@ -1,3 +1,5 @@
+#include "client.h"
+#include "httparser.h"
 #include "log.h"
 #include "server.h"
 #include <iostream>
@@ -15,7 +17,13 @@ int main(int argc, char **argv) {
     if ((pid = fork() == 0)) {
       std::cout << "new request" << std::endl;
       std::string HTTPRequest = server.receiveHTTPRequest(newfd);
-      std::cout << HTTPRequest; // handleHTTPRequest();
+      HTTParser httparser(HTTPRequest);
+      std::string hostname = httparser.getHostName();
+      std::string port = httparser.getHostPort();
+      Client client(hostname.c_str(), port.c_str());
+      client.sendData(HTTPRequest);
+      std::string HTTPResponse = client.receiveHTTP();
+      server.sendData(newfd, HTTPResponse);
       close(newfd);
       _exit(EXIT_SUCCESS);
     }

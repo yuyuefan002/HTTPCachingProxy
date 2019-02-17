@@ -87,7 +87,10 @@ std::string Client::recvall(int fd) {
       exit(EXIT_FAILURE);
     } else if (nbytes == -1) {
       break;
-    } else {
+
+    } else if (nbytes == 0)
+      break;
+    else {
       buf[nbytes] = '\0';
       msg += buf;
     }
@@ -100,7 +103,7 @@ std::string Client::receiveHTTP() { return recvall(sockfd); }
 /*int main() { Client client("localhost", "8080"); }*/
 // sendData test
 /*int main() {
-  Client client("rabihyounes.com", "8080");
+  Client client("rabihyounes.com", "80");
   client.sendData("GET /awesome.txt HTTP/1.1\r\nHost:rabihyounes.com\r\n\r\n");
   std::cout << client.receiveHTTP();
 }
