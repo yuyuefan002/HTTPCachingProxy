@@ -1,2 +1,6 @@
 2/16
 1. Avoiding using exit() or _exit() to quit the subprocess created by fork(), since recourses cannot be realeased by this two method.
+2. could we narrow the waiting interval of recv in client.cpp, 1s might be too long.
+
+2/17
+warning: pass unit test only means it behaves right when using it right.
