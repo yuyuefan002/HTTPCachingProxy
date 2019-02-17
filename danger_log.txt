@@ -1,0 +1,2 @@
+2/16
+1. Avoiding using exit() or _exit() to quit the subprocess created by fork(), since recourses cannot be realeased by this two method.

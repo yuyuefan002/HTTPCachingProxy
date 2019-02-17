@@ -52,7 +52,7 @@ std::string Server::recvall(int fd) {
       exit(EXIT_FAILURE);
     } else {
       buf[nbytes] = '\0';
-      msg += buf;
+      msg.append(buf);
     }
   }
   return msg;

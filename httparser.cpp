@@ -88,6 +88,8 @@ HTTParser::~HTTParser() {}
 int HTTParser::errorDetection() { return errnum; }
 std::string HTTParser::getHostName() { return host; }
 std::string HTTParser::getHostPort() { return port; }
+
+// valgrind clean
 /*
 int main() {
   std::string HTTPRequest = "GET /awesome.txt HTTP/1.1\r\nHost: "

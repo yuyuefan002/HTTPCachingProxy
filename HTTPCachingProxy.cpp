@@ -25,8 +25,10 @@ int main(int argc, char **argv) {
       std::string HTTPResponse = client.receiveHTTP();
       server.sendData(newfd, HTTPResponse);
       close(newfd);
-      _exit(EXIT_SUCCESS);
+      return EXIT_SUCCESS; // we could not use exit here, because resources
+                           // cannot be released gracefully.
     }
     close(newfd);
   }
+  return EXIT_SUCCESS;
 }
