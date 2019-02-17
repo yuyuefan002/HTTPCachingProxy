@@ -35,7 +35,7 @@ std::string smartPort(std::string &msg) {
 void HTTParser::parseRequest(std::string request) {
   method = fetchNextSeg(request);
   path = fetchNextSeg(request);
-  port = smartPort(path);
+  // port = smartPort(path);
   protocol = fetchNextSeg(request, '/');
   version_major = stoi(fetchNextSeg(request, '.'));
   version_minor = stoi(fetchNextSeg(request));
@@ -65,6 +65,18 @@ int HTTParser::verifyHeader() {
   }
   return 0;
 }
+std ::string HTTParser::updateHTTPRequest(std::string request) {
+  size_t target;
+  if ((target = request.find("http://")) != std::string::npos) {
+    request.replace(target, 7, "");
+  }
+  if ((target = request.find(host)) != std::string::npos) {
+    request.replace(target, host.size(), "");
+  }
+  if ((target = request.find(":" + port)) != std::string::npos)
+    request.replace(target, 1 + port.size(), "");
+  return request;
+}
 HTTParser::HTTParser(std::string r) : HTTPRequest(r) {
   errnum = 0;
   int target = HTTPRequest.find("\r\n");
@@ -77,6 +89,7 @@ HTTParser::HTTParser(std::string r) : HTTPRequest(r) {
     host = headers["Host"];
     port = smartPort(host);
   }
+  HTTPRequest = updateHTTPRequest(HTTPRequest);
 }
 HTTParser::~HTTParser() {}
 /*
@@ -88,7 +101,7 @@ HTTParser::~HTTParser() {}
 int HTTParser::errorDetection() { return errnum; }
 std::string HTTParser::getHostName() { return host; }
 std::string HTTParser::getHostPort() { return port; }
-
+std::string HTTParser::getRequest() { return HTTPRequest; }
 // valgrind clean
 /*
 int main() {

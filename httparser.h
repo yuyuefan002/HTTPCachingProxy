@@ -18,6 +18,7 @@ private:
   void parseRequest(std::string request);
   void parseHeader(std::string head);
   int verifyHeader();
+  std::string updateHTTPRequest(std::string request);
 
 public:
   HTTParser(std::string r);
@@ -25,5 +26,6 @@ public:
   int errorDetection();
   std::string getHostName();
   std::string getHostPort();
+  std::string getRequest();
 };
 #endif
