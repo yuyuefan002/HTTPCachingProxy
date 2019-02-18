@@ -94,3 +94,9 @@ int main() {
     std::cout << cache.read("https://www.rabihyounes.com/awesome.txt");
 }
 */
+// check freshness
+// check expires field at first, check max-age directive at second(more
+// important, if exist,ignore expire)
+// check age first, if none, check expire,if none,check last-modefied,10%
+// header may has a field cache-control:(no-cache)
+// URI containing '?' is not cacheable

@@ -19,7 +19,13 @@ std::string fetchNextSeg(std::string &msg, char c = ' ', size_t substrlen = 1) {
 
   return res;
 }
-
+std::string tolower(const std::string &msg) {
+  std::string res;
+  for (auto c : msg) {
+    res += std::tolower(c);
+  }
+  return res;
+}
 // pass unit test
 std::string smartPort(std::string &msg) {
   size_t target;
@@ -43,7 +49,7 @@ void HTTParser::parseRequest(std::string request) {
 // pass unit test
 void HTTParser::parseHeader(std::string head) {
   while (!head.empty()) {
-    std::string key = fetchNextSeg(head, ':');
+    std::string key = tolower(fetchNextSeg(head, ':'));
     std::string value = fetchNextSeg(head, '\r', 2);
     headers[key] = value;
   }
@@ -56,8 +62,8 @@ void HTTParser::parseHeader(std::string head) {
  */
 int HTTParser::verifyHeader() {
   try {
-    if (headers.find("Host") == headers.end())
-      throw std::string("Host");
+    if (headers.find("host") == headers.end())
+      throw std::string("host");
   } catch (std::string e) {
     std::cerr << "missing " << e << std::endl;
     errnum = 1;
@@ -86,7 +92,7 @@ HTTParser::HTTParser(std::string r) : HTTPRequest(r) {
   std::string head = HTTPRequest.substr(target + 2, head_end - target - 2);
   parseHeader(head);
   if (verifyHeader() != -1) {
-    host = headers["Host"];
+    host = headers["host"];
     port = smartPort(host);
   }
   HTTPRequest = updateHTTPRequest(HTTPRequest);
