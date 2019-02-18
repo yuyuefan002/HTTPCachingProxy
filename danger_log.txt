@@ -4,3 +4,5 @@
 
 2/17
 warning: pass unit test only means it behaves right when using it right.
+2/18
+1. real all text from a file should use getline until eof

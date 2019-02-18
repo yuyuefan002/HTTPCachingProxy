@@ -1,32 +1,9 @@
 #include "cache.h"
-/*
- * warning: this function will motify original string
- * pass unit test
- */
-std::string trimLeadingSpace(std::string &msg) {
-  size_t target = msg.find_first_not_of(' ');
-  return msg.substr(target);
-}
-/*
- * warning: this function will motify original string
- * pass unit test
- */
-std::string fetchNextSeg(std::string &msg, char c = ' ', size_t substrlen = 1) {
-  msg = trimLeadingSpace(msg);
-  size_t target = msg.find(c);
-  std::string res = msg.substr(0, target);
-  if (target != std::string::npos)
-    msg = msg.substr(target + substrlen);
-  else
-    msg = "";
-
-  return res;
-}
 // pass unit test
 void Cache::createIndex(std::string path) {
   std::string dir;
   while (!path.empty()) {
-    dir += fetchNextSeg(path, '/');
+    dir += helper.fetchNextSeg(path, '/');
     if (!path.empty()) {
       mkdir(dir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
       dir += "/";
@@ -45,7 +22,7 @@ std::string Cache::parseURL(std::string url) {
     url = url.substr(target + 3);
   }
   while (!url.empty()) {
-    std::string dir = fetchNextSeg(url, '/');
+    std::string dir = helper.fetchNextSeg(url, '/');
     path += "/" + dir;
   }
   return path;
@@ -53,8 +30,8 @@ std::string Cache::parseURL(std::string url) {
 // pass unit test
 Cache::Cache() {
   cachename = "proxycache";
-  int status;
-  status = mkdir(cachename.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+  mkdir(cachename.c_str(),
+        S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH); // ignore fail here
 }
 // pass unit test
 void Cache::store(const std::string &url, const std::string &msg) {
@@ -68,20 +45,28 @@ void Cache::store(const std::string &url, const std::string &msg) {
 
 /* pass unit test
  * suggestion: use read() after check()
+ * problem here, ifstream only input oneline here, use loop to input all
  */
 std::string Cache::read(const std::string &url) {
   std::string msg;
   std::ifstream ifs;
   std::string path = parseURL(url);
   ifs.open(path, std::ifstream::in);
-  ifs >> msg;
+  while (!ifs.eof()) {
+    std::string tmp;
+    getline(ifs, tmp);
+    size_t target;
+    if ((target = tmp.find('\r')) != std::string::npos)
+      tmp.replace(target, 1, "\r\n");
+    msg += tmp;
+  }
   ifs.close();
   return msg;
 }
 
 // pass unit test
 // robust code, no way to fail or return wrong result
-inline bool Cache::check(const std::string &url) {
+bool Cache::check(const std::string &url) {
   std::string path = parseURL(url);
   struct stat buf;
   return (stat(path.c_str(), &buf) == 0);

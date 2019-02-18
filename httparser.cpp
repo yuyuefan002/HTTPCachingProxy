@@ -1,31 +1,4 @@
 #include "httparser.h"
-/*
- * warning: this function will motify original string
- * pass unit test
- */
-std::string trimLeadingSpace(std::string &msg) {
-  size_t target = msg.find_first_not_of(' ');
-  return msg.substr(target);
-}
-// pass unit test
-std::string fetchNextSeg(std::string &msg, char c = ' ', size_t substrlen = 1) {
-  msg = trimLeadingSpace(msg);
-  size_t target = msg.find(c);
-  std::string res = msg.substr(0, target);
-  if (target != std::string::npos)
-    msg = msg.substr(target + substrlen);
-  else
-    msg = "";
-
-  return res;
-}
-std::string tolower(const std::string &msg) {
-  std::string res;
-  for (auto c : msg) {
-    res += std::tolower(c);
-  }
-  return res;
-}
 // pass unit test
 std::string smartPort(std::string &msg) {
   size_t target;
@@ -39,18 +12,17 @@ std::string smartPort(std::string &msg) {
 }
 // pass unit test
 void HTTParser::parseRequest(std::string request) {
-  method = fetchNextSeg(request);
-  path = fetchNextSeg(request);
-  // port = smartPort(path);
-  protocol = fetchNextSeg(request, '/');
-  version_major = stoi(fetchNextSeg(request, '.'));
-  version_minor = stoi(fetchNextSeg(request));
+  method = helper.fetchNextSeg(request);
+  path = helper.fetchNextSeg(request);
+  protocol = helper.fetchNextSeg(request, '/');
+  version_major = stoi(helper.fetchNextSeg(request, '.'));
+  version_minor = stoi(helper.fetchNextSeg(request));
 }
 // pass unit test
 void HTTParser::parseHeader(std::string head) {
   while (!head.empty()) {
-    std::string key = tolower(fetchNextSeg(head, ':'));
-    std::string value = fetchNextSeg(head, '\r', 2);
+    std::string key = helper.tolower(helper.fetchNextSeg(head, ':'));
+    std::string value = helper.fetchNextSeg(head, '\r', 2);
     headers[key] = value;
   }
 }
@@ -73,15 +45,19 @@ int HTTParser::verifyHeader() {
 }
 std ::string HTTParser::updateHTTPRequest(std::string request) {
   size_t target;
-  if ((target = request.find("http://")) != std::string::npos) {
-    request.replace(target, 7, "");
-  }
-  if ((target = request.find(host)) != std::string::npos) {
-    request.replace(target, host.size(), "");
-  }
   if ((target = request.find(":" + port)) != std::string::npos)
     request.replace(target, 1 + port.size(), "");
   return request;
+}
+/*
+ * status: need more test
+ * currently pass unit test
+ */
+std::string HTTParser::updateHTTPath(std::string &path) {
+  if (path.find(host) != std::string::npos)
+    return path;
+  path.insert(0, host);
+  return path;
 }
 HTTParser::HTTParser(std::string r) : HTTPRequest(r) {
   errnum = 0;
@@ -96,6 +72,7 @@ HTTParser::HTTParser(std::string r) : HTTPRequest(r) {
     port = smartPort(host);
   }
   HTTPRequest = updateHTTPRequest(HTTPRequest);
+  path = updateHTTPath(path);
 }
 HTTParser::~HTTParser() {}
 /*
@@ -108,11 +85,14 @@ int HTTParser::errorDetection() { return errnum; }
 std::string HTTParser::getHostName() { return host; }
 std::string HTTParser::getHostPort() { return port; }
 std::string HTTParser::getRequest() { return HTTPRequest; }
-// valgrind clean
+std::string HTTParser::getMethod() { return method; }
+std::string HTTParser::getURL() { return path; } // valgrind clean
 /*
 int main() {
-  std::string HTTPRequest = "GET /awesome.txt HTTP/1.1\r\nHost: "
-                            "rabihyounes.com\r\nUser-Agent:Feedburner\r\n\r\n";
+  std::string HTTPRequest =
+      "GET http://rabihyounes.com/awesome.txt HTTP/1.1\r\nHost: "
+      "rabihyounes.com\r\nUser-Agent:Feedburner\r\n\r\n";
   HTTParser httparser(HTTPRequest);
+  std::cout << httparser.getRequest();
 }
 */

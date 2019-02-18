@@ -9,3 +9,4 @@ HTTPCachingProxy:$(OBJS)
 .PHONY: clean
 clean:
 	rm -f HTTPCachingProxy *.o *~ a.out
+	rm -rf proxycache
