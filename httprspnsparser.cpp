@@ -1,56 +1,27 @@
 #include "httprspnsparser.h"
-/*
- * warning: this function will motify original string
- * pass unit test
- */
-std::string trimLeadingSpace(std::string &msg) {
-  size_t target = msg.find_first_not_of(' ');
-  return msg.substr(target);
-}
-// pass unit test
-std::string fetchNextSeg(std::string &msg, char c = ' ', size_t substrlen = 1) {
-  msg = trimLeadingSpace(msg);
-  size_t target = msg.find(c);
-  std::string res = msg.substr(0, target);
-  if (target != std::string::npos)
-    msg = msg.substr(target + substrlen);
-  else
-    msg = "";
 
-  return res;
-}
-std::string tolower(const std::string &msg) {
-  std::string res;
-  for (auto c : msg) {
-    res += std::tolower(c);
-  }
-  return res;
-}
 void HTTPRSPNSParser::parseStatus(std::string statusline) {
-  protocol = fetchNextSeg(statusline, '/');
-  version_major = stoi(fetchNextSeg(statusline, '.'));
-  version_minor = stoi(fetchNextSeg(statusline));
-  status_code = stoi(fetchNextSeg(statusline));
+  protocol = helper.fetchNextSeg(statusline, '/');
+  version_major = stoi(helper.fetchNextSeg(statusline, '.'));
+  version_minor = stoi(helper.fetchNextSeg(statusline));
+  status_code = stoi(helper.fetchNextSeg(statusline));
   status_text = statusline;
 }
 void HTTPRSPNSParser::parseHeader(std::string head) {
   while (!head.empty()) {
-    std::string key = tolower(fetchNextSeg(head, ':'));
-    std::string value = fetchNextSeg(head, '\r', 2);
+    std::string key = helper.tolower(helper.fetchNextSeg(head, ':'));
+    std::string value = helper.fetchNextSeg(head, '\r', 2);
     headers[key] = value;
   }
 }
-size_t HTTPTimeRange2Num(std::string end, std::string start) {
-  size_t age;
-  return age;
-}
+
 /*
  * Description: Calcuelate the lifttime of a response
  *              first check "Cache-Control:max-age=N",
  *              if None, second check "Expires",
  *              if None, third check "Last-Modified".
  */
-size_t HTTPRSPNSParser::calculateAge() {
+size_t HTTPRSPNSParser::getMaxAge() {
   size_t age = 0;
   if (headers.find("cache-control") != headers.end()) {
     size_t target;
@@ -63,20 +34,38 @@ size_t HTTPRSPNSParser::calculateAge() {
     }
   } else if (headers.find("expires") != headers.end() &&
              headers.find("date") != headers.end()) {
-    age = HTTPTimeRange2Num(headers["expires"], headers["date"]);
+    age = helper.HTTPTimeRange2Num(headers["expires"], headers["date"]);
   } else if (headers.find("last-modified") != headers.end() &&
              headers.find("date") != headers.end()) {
-    size_t age = HTTPTimeRange2Num(headers["date"], headers["last-modified"]);
+    age = helper.HTTPTimeRange2Num(headers["date"], headers["last-modified"]);
     age /= 10;
   }
   return age;
 }
+size_t HTTPRSPNSParser::getAge() {
+  size_t age = 0;
+  age = helper.HTTPAge(headers["date"]);
+  return age;
+}
+void HTTPRSPNSParser::updateAgeField() {
+  size_t target;
+  if ((target = HTTPResponse.find("Age:")) != std::string::npos) {
+    helper.deleteALine(HTTPResponse, target);
+  }
+
+  std::stringstream ss;
+  ss << "Age: " << getAge() << "\r\n";
+  std::string Age = ss.str();
+  target = HTTPResponse.find("\r\n\r\n");
+  HTTPResponse.insert(target, Age);
+}
 HTTPRSPNSParser::HTTPRSPNSParser(std::string response) {
-  int target = response.find("\r\n");
-  std::string statusline = response.substr(0, target);
+  HTTPResponse = response;
+  int target = HTTPResponse.find("\r\n");
+  std::string statusline = HTTPResponse.substr(0, target);
   parseStatus(statusline);
-  int head_end = response.find("\r\n\r\n");
-  std::string head = response.substr(target + 2, head_end - target - 2);
+  int head_end = HTTPResponse.find("\r\n\r\n");
+  std::string head = HTTPResponse.substr(target + 2, head_end - target - 2);
   parseHeader(head);
 }
 
