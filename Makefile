@@ -8,4 +8,4 @@ HTTPCachingProxy:$(OBJS)
 	$(CC) $(CFLAGS) -c $<
 .PHONY: clean
 clean:
-	rm -f HTTPCachingProxy *.o *~
+	rm -f HTTPCachingProxy *.o *~ a.out

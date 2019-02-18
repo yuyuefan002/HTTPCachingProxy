@@ -71,12 +71,16 @@ double Helper::HTTPTimeRange2Num(std::string end, std::string start) {
   std::string zone2 = fetchNextSeg(start);
   start_tm.tm_zone = zone2.c_str();
 
-  std::cout << asctime(&start_tm) << asctime(&end_tm);
   seconds = difftime(mktime(&end_tm), mktime(&start_tm));
-  std::cout << asctime(&start_tm) << asctime(&end_tm);
   return seconds;
 }
-// pass unit test
+/* pass unit test
+ * warning: something unsure may happen, currently usring gmt time,
+ *          i don't know how difftime works, will it change
+ *          timezone automatically?
+ *
+ *
+ */
 size_t Helper::HTTPAge(std::string date) {
   size_t seconds;
   struct tm date_tm;
@@ -92,7 +96,8 @@ size_t Helper::HTTPAge(std::string date) {
   date_tm.tm_zone = zone2.c_str();
   time_t now;
   time(&now);
-  seconds = difftime(now, mktime(&date_tm));
+  struct tm *ptm = gmtime(&now);
+  seconds = difftime(mktime(ptm), mktime(&date_tm));
   return seconds;
 }
 std::string Helper::deleteALine(std::string msg, size_t date) {
@@ -105,10 +110,12 @@ std::string Helper::deleteALine(std::string msg, size_t date) {
 /*
 int main() {
   Helper helper;
-  std::cout << helper.HTTPTimeRange2Num("Fri, 08 Feb 2019 18:44:41 GMT",
-                                        "Fri, 08 Feb 2019 18:43:41 GMT")
-            << std::endl;
-  std::cout << helper.HTTPAge("Fri, 08 Feb 2019 18:43:41 GMT");
-  // std::cout << helper.deleteALine("asd\r\ndelete\r\nA new line\r\n", 5);
+  //  std::cout << helper.HTTPTimeRange2Num("Fri, 08 Feb 2019 18:44:41 GMT",
+  //                                     "Fri, 08 Feb 2019 18:43:41 GMT")
+  //<< std::endl;
+  std::cout << helper.HTTPAge("Date: Mon, 18 Feb 2019 20:55:11 GMT");
+  // std::cout <<
+  // helper.deleteALine("asd\r\ndelete\r\nA
+  // new line\r\n", 5);
 }
 */

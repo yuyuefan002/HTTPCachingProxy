@@ -24,8 +24,9 @@ private:
 
 public:
   HTTPRSPNSParser(std::string response);
-  ~HTTPRSPNSParser();
   size_t getStatusCode();
   bool good4Cache();
+  bool stillfresh();
+  std::string getResponse();
 };
 #endif
