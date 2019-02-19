@@ -17,23 +17,28 @@ int main(int argc, char **argv) {
     int newfd = server.acceptNewConn();
     if (newfd < 0)
       std::cerr << "Fail to accept a new request\n";
-    // int pid;
-    // if ((pid = fork() == 0)) {
-    std::cout << "new request" << std::endl;
-    std::string HTTPRequest = server.receiveHTTPRequest(newfd);
-    HTTParser httparser(HTTPRequest);
-    Cache cache;
-    std::string HTTPResponse;
-    std::string url = httparser.getURL();
-    if (cache.check(url)) {
-      HTTPResponse = cache.read(url);
-      HTTPRSPNSParser httprspnsparser(HTTPResponse);
-      if (httprspnsparser.stillfresh()) {
-        server.sendData(newfd, httprspnsparser.getResponse());
-        //   close(newfd);
-        // return EXIT_SUCCESS;
+    int pid;
+    if ((pid = fork() == 0)) {
+      std::cout << "new request" << std::endl;
+      std::string HTTPRequest = server.receiveHTTPRequest(newfd);
+      HTTParser httparser(HTTPRequest);
+      Cache cache;
+      std::string HTTPResponse;
+      std::string url = httparser.getURL();
+      if (httparser.getMethod() != "GET") {
+        close(newfd);
+        continue;
       }
-    } else {
+      if (cache.check(url)) {
+        HTTPResponse = cache.read(url);
+        HTTPRSPNSParser httprspnsparser(HTTPResponse);
+        if (httprspnsparser.stillfresh()) {
+          server.sendData(newfd, httprspnsparser.getResponse());
+          close(newfd);
+          return EXIT_SUCCESS;
+        }
+      }
+
       std::string hostname = httparser.getHostName();
       std::string port = httparser.getHostPort();
       Client client(hostname.c_str(),
@@ -41,17 +46,18 @@ int main(int argc, char **argv) {
                                    // return 503
       client.sendData(httparser.getRequest());
       HTTPResponse = client.receiveHTTP();
+      // std::cout << HTTPResponse;
       HTTPRSPNSParser httprspnsparser(HTTPResponse);
       if (httparser.getMethod() == "GET" &&
           httprspnsparser.getStatusCode() == 200 &&
           httprspnsparser.good4Cache())
         cache.store(url, HTTPResponse);
       server.sendData(newfd, HTTPResponse);
+
+      close(newfd);
+      return EXIT_SUCCESS; // we could not use exit here, because resources
+      // cannot be released gracefully.
     }
-    // close(newfd);
-    // return EXIT_SUCCESS; // we could not use exit here, because resources
-    // cannot be released gracefully.
-    //}
     close(newfd);
   }
   return EXIT_SUCCESS;

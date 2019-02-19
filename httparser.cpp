@@ -45,8 +45,19 @@ int HTTParser::verifyHeader() {
 }
 std ::string HTTParser::updateHTTPRequest(std::string request) {
   size_t target;
+  size_t end = request.find("\r\n");
+  if ((target = request.find("http://")) != std::string::npos) {
+    request.replace(target, 7, "");
+  }
+  if ((target = request.find(host)) != std::string::npos && target < end) {
+    request.replace(target, host.size(), "");
+  }
   if ((target = request.find(":" + port)) != std::string::npos)
     request.replace(target, 1 + port.size(), "");
+  end = request.find("\r\n");
+  path = request.substr(0, end);
+  std::cout << "first line: " << path << std::endl;
+  path = updateHTTPath(path);
   return request;
 }
 /*
@@ -54,9 +65,10 @@ std ::string HTTParser::updateHTTPRequest(std::string request) {
  * currently pass unit test
  */
 std::string HTTParser::updateHTTPath(std::string &path) {
-  if (path.find(host) != std::string::npos)
-    return path;
-  path.insert(0, host);
+  helper.fetchNextSeg(path);
+  path = helper.fetchNextSeg(path);
+  if (path.find(host) == std::string::npos)
+    path.insert(0, host);
   return path;
 }
 HTTParser::HTTParser(std::string r) : HTTPRequest(r) {
@@ -68,12 +80,13 @@ HTTParser::HTTParser(std::string r) : HTTPRequest(r) {
   std::string head = HTTPRequest.substr(target + 2, head_end - target - 2);
   parseHeader(head);
   if (verifyHeader() != -1) {
+
+    port = smartPort(headers["host"]);
     host = headers["host"];
-    port = smartPort(host);
   }
   HTTPRequest = updateHTTPRequest(HTTPRequest);
-  path = updateHTTPath(path);
 }
+
 HTTParser::~HTTParser() {}
 /*
  * advice: run this function to detect error in HTTP request
@@ -86,7 +99,10 @@ std::string HTTParser::getHostName() { return host; }
 std::string HTTParser::getHostPort() { return port; }
 std::string HTTParser::getRequest() { return HTTPRequest; }
 std::string HTTParser::getMethod() { return method; }
-std::string HTTParser::getURL() { return path; } // valgrind clean
+std::string HTTParser::getURL() {
+  std::cout << path << std::endl;
+  return path;
+} // valgrind clean
 /*
 int main() {
   std::string HTTPRequest =

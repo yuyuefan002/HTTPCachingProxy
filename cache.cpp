@@ -49,18 +49,11 @@ void Cache::store(const std::string &url, const std::string &msg) {
  */
 std::string Cache::read(const std::string &url) {
   std::string msg;
-  std::ifstream ifs;
   std::string path = parseURL(url);
-  ifs.open(path, std::ifstream::in);
-  while (!ifs.eof()) {
-    std::string tmp;
-    getline(ifs, tmp);
-    size_t target;
-    if ((target = tmp.find('\r')) != std::string::npos)
-      tmp.replace(target, 1, "\r\n");
-    msg += tmp;
-  }
-  ifs.close();
+  std::ifstream t(path);
+  std::stringstream buf;
+  buf << t.rdbuf();
+  msg = buf.str();
   return msg;
 }
 
@@ -74,11 +67,20 @@ bool Cache::check(const std::string &url) {
 /*
 int main() {
   Cache cache;
-  cache.store("https://www.rabihyounes.com/awesome.txt", "another hello");
-  if (cache.check("https://www.rabihyounes.com/awesome.txt"))
-    std::cout << cache.read("https://www.rabihyounes.com/awesome.txt");
+  cache.store(
+      "HTTP/1.1 200 OK\r\nDate: Tue, 19 Feb 2019 00:45:50 GMT\r\nServer: "
+      "Apache\r\nLast-Modified: Thu, 22 Apr 2004 15:52:25 "
+      "GMT\r\nAccept-Ranges: bytes\r\nContent-Length: 24557\r\nVary: "
+      "Accept-Encoding,User-Agent\r\nContent-Type: text/html\r\nSet-Cookie: "
+      "BIGipServer~CUIT~www.columbia.edu-80-pool=1781021568.20480.0000; "
+      "expires=Tue, 19-Feb-2019 06:45:50 GMT; path=/; "
+      "Httponly\r\n\r\n<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 "
+      "Transitional//EN\">\r\n<html>\r\n<head>\r\n<!-- THIS IS A "make
+  if (cache.check("https://rabihyounes.com/awesome.txt"))
+    std::cout << cache.read("https://rabihyounes.com/awesome.txt");
+  std::cout << "finish\n";
 }
-*/
+    */
 // check freshness
 // check expires field at first, check max-age directive at second(more
 // important, if exist,ignore expire)
