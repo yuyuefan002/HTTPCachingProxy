@@ -23,7 +23,9 @@ private:
 public:
   Client(const char *h, const char *p);
   ~Client();
-  std::string receiveHTTP();
-  void sendData(std::string msg);
+  std::string recvGETResponse();
+  void GET(std::string msg);
+  std::string recvPOSTResponse();
+  void POST(std::string msg);
 };
 #endif

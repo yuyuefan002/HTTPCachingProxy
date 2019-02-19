@@ -61,7 +61,7 @@ int Client::sendall(int fd, const char *buf, size_t *len) {
   return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
 }
 // pass unit test
-void Client::sendData(std::string msg) {
+void Client::GET(std::string msg) {
   size_t sent = 0;
   size_t len = msg.length();
   size_t max = msg.length();
@@ -84,7 +84,7 @@ std::string Client::recvall(int fd) {
     nbytes = recv(fd, buf, MAXDATASIZE - 1, 0);
     if (nbytes == -1 && msg.empty()) {
       std::cerr << "recv failed\n";
-      exit(EXIT_FAILURE);
+      break;
     } else if (nbytes == -1) {
       break;
 
@@ -97,8 +97,27 @@ std::string Client::recvall(int fd) {
   }
   return msg;
 }
-std::string Client::receiveHTTP() { return recvall(sockfd); }
+std::string Client::recvGETResponse() { return recvall(sockfd); }
 
+std::string Client::recvPOSTResponse() {
+  while (1) {
+    std::cout << recvall(sockfd);
+  }
+  return recvall(sockfd);
+}
+void Client::POST(std::string msg) {
+  size_t sent = 0;
+  size_t len = msg.length();
+  size_t max = msg.length();
+  while (sent < len) {
+    sent = len - sent;
+    len = sent;
+    if (sendall(sockfd, msg.substr(max - len).c_str(), &sent) == -1) {
+      std::cerr << "send failed\n";
+      exit(EXIT_FAILURE);
+    }
+  }
+}
 // initializer test
 /*int main() { Client client("localhost", "8080"); }*/
 // sendData test

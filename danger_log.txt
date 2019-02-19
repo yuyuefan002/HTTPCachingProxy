@@ -11,3 +11,10 @@ warning: pass unit test only means it behaves right when using it right.
 4. cannot save root directory, if it is not a recourse name, we should store them in index.html.
 5. string will omit any content after \0, data encoding is common in http, therefore, we should user char pointer to handle our http response;
 
+2/19
+1.important:need to change cache implementation
+2.LRU eviction strategy
+3.look up the diff between GET POST and CONNECT
+4.we should use connect timeout to end recv data from server, or it will be even slower
+5.when we use post, server will disconnect once?
+6.each post will happen after connect
