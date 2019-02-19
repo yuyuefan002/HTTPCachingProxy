@@ -4,7 +4,11 @@
  * pass unit test
  */
 std::string Helper::trimLeadingSpace(std::string &msg) {
+  if (msg.empty())
+    return "";
   size_t target = msg.find_first_not_of(' ');
+  if (target == std::string::npos)
+    return msg;
   return msg.substr(target);
 }
 // pass unit test

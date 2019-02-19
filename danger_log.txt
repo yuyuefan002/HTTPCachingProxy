@@ -7,3 +7,5 @@ warning: pass unit test only means it behaves right when using it right.
 2/18
 1. real all text from a file should use getline until eof
 2. getline is not a good idea, it will ruin the format, sstream is better
+3. proxy is slow
+4. cannot save root directory

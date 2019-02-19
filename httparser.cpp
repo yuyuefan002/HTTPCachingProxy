@@ -56,7 +56,6 @@ std ::string HTTParser::updateHTTPRequest(std::string request) {
     request.replace(target, 1 + port.size(), "");
   end = request.find("\r\n");
   path = request.substr(0, end);
-  std::cout << "first line: " << path << std::endl;
   path = updateHTTPath(path);
   return request;
 }
@@ -99,10 +98,7 @@ std::string HTTParser::getHostName() { return host; }
 std::string HTTParser::getHostPort() { return port; }
 std::string HTTParser::getRequest() { return HTTPRequest; }
 std::string HTTParser::getMethod() { return method; }
-std::string HTTParser::getURL() {
-  std::cout << path << std::endl;
-  return path;
-} // valgrind clean
+std::string HTTParser::getURL() { return path; } // valgrind clean
 /*
 int main() {
   std::string HTTPRequest =

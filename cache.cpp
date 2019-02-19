@@ -21,9 +21,16 @@ std::string Cache::parseURL(std::string url) {
   if ((target = url.find("://")) != std::string::npos) {
     url = url.substr(target + 3);
   }
+  int root = 1;
   while (!url.empty()) {
     std::string dir = helper.fetchNextSeg(url, '/');
     path += "/" + dir;
+    // untested code
+    if (url.empty() && dir.find('.') == std::string::npos)
+      path += "/index.html";
+    if (root && url.empty())
+      path += "/index.html";
+    root = 0;
   }
   return path;
 }
@@ -33,6 +40,7 @@ Cache::Cache() {
   mkdir(cachename.c_str(),
         S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH); // ignore fail here
 }
+// original problem: cannot open a file has the samename as a path
 // pass unit test
 void Cache::store(const std::string &url, const std::string &msg) {
   std::ofstream ofs;
@@ -50,6 +58,12 @@ void Cache::store(const std::string &url, const std::string &msg) {
 std::string Cache::read(const std::string &url) {
   std::string msg;
   std::string path = parseURL(url);
+  struct stat s;
+  if (stat(path.c_str(), &s) == 0) {
+    if (s.st_mode & S_IFDIR) {
+      path += "/index.html";
+    }
+  }
   std::ifstream t(path);
   std::stringstream buf;
   buf << t.rdbuf();

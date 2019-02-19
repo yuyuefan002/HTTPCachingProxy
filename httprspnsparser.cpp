@@ -78,6 +78,8 @@ void HTTPRSPNSParser::updateAgeField() {
 }
 // pass unit test
 HTTPRSPNSParser::HTTPRSPNSParser(std::string response) {
+  if (response.empty())
+    throw std::string("root dir");
   HTTPResponse = response;
   int target = HTTPResponse.find("\r\n");
   std::string statusline = HTTPResponse.substr(0, target);

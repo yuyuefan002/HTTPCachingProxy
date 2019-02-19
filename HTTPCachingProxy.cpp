@@ -31,11 +31,16 @@ int main(int argc, char **argv) {
       }
       if (cache.check(url)) {
         HTTPResponse = cache.read(url);
-        HTTPRSPNSParser httprspnsparser(HTTPResponse);
-        if (httprspnsparser.stillfresh()) {
-          server.sendData(newfd, httprspnsparser.getResponse());
-          close(newfd);
-          return EXIT_SUCCESS;
+        try {
+          HTTPRSPNSParser httprspnsparser(HTTPResponse);
+
+          if (httprspnsparser.stillfresh()) {
+            server.sendData(newfd, httprspnsparser.getResponse());
+            close(newfd);
+            return EXIT_SUCCESS;
+          }
+        } catch (std::string e) {
+          // website open a root directory
         }
       }
 
@@ -43,7 +48,7 @@ int main(int argc, char **argv) {
       std::string port = httparser.getHostPort();
       Client client(hostname.c_str(),
                     port.c_str()); // have to check success or not, if failed,
-                                   // return 503
+                                   // return 503,important
       client.sendData(httparser.getRequest());
       HTTPResponse = client.receiveHTTP();
       // std::cout << HTTPResponse;
