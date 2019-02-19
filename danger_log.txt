@@ -8,4 +8,6 @@ warning: pass unit test only means it behaves right when using it right.
 1. real all text from a file should use getline until eof
 2. getline is not a good idea, it will ruin the format, sstream is better
 3. proxy is slow
-4. cannot save root directory
+4. cannot save root directory, if it is not a recourse name, we should store them in index.html.
+5. string will omit any content after \0, data encoding is common in http, therefore, we should user char pointer to handle our http response;
+
