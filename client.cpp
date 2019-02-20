@@ -76,12 +76,14 @@ void Client::GET(std::string msg) {
 }
 
 // pass unit test, timeout=1, might be too long
-std::string Client::recvall(int fd) {
-  std::string msg;
+std::vector<char> Client::recvall(int fd) {
+  std::vector<char> msg;
+  size_t index = 0;
   int nbytes;
-  char buf[MAXDATASIZE];
   while (1) {
-    nbytes = recv(fd, buf, MAXDATASIZE - 1, 0);
+    if (msg.size() < index + MAXDATASIZE)
+      msg.resize(index + MAXDATASIZE);
+    nbytes = recv(fd, &msg.data()[index], MAXDATASIZE - 1, 0);
     if (nbytes == -1 && msg.empty()) {
       std::cerr << "recv failed\n";
       break;
@@ -91,20 +93,13 @@ std::string Client::recvall(int fd) {
     } else if (nbytes == 0)
       break;
     else {
-      buf[nbytes] = '\0';
-      msg += buf;
+      index += nbytes;
     }
   }
   return msg;
 }
-std::string Client::recvGETResponse() { return recvall(sockfd); }
+std::string Client::recvGETResponse() { return recvall(sockfd).data(); }
 
-std::string Client::recvPOSTResponse() {
-  while (1) {
-    std::cout << recvall(sockfd);
-  }
-  return recvall(sockfd);
-}
 void Client::POST(std::string msg) {
   size_t sent = 0;
   size_t len = msg.length();

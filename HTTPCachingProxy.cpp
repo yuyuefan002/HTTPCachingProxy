@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
     std::cerr << "Usage: HTTPCachingProxy <port>\n";
     exit(EXIT_FAILURE);
   }
-  daemon(0, 0);
+  /* daemon(0, 0);
   umask(0);
   pid_t pid = fork();
   if (pid < 0) {
@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
   }
   if (pid > 0) {
     return EXIT_SUCCESS;
-  }
+    }*/
   Proxy proxy(argv[1]);
   while (1) {
     int newfd = proxy.accNewRequest();

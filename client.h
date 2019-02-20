@@ -8,6 +8,7 @@
 #include <string>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <vector>
 #define MAXDATASIZE 100
 typedef struct addrinfo addrinfo;
 typedef struct timeval timeval;
@@ -17,7 +18,7 @@ private:
   const char *port;
   int sockfd;
   const char *getHost(const char *hostname);
-  std::string recvall(int fd);
+  std::vector<char> recvall(int fd);
   int sendall(int fd, const char *buf, size_t *len);
 
 public:
@@ -25,7 +26,6 @@ public:
   ~Client();
   std::string recvGETResponse();
   void GET(std::string msg);
-  std::string recvPOSTResponse();
   void POST(std::string msg);
 };
 #endif
