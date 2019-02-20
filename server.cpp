@@ -76,14 +76,14 @@ int Server::sendall(int fd, const char *buf, size_t *len) {
   return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
 }
 std::string Server::receiveHTTPRequest(int fd) { return recvall(fd); }
-void Server::sendData(int fd, std::string msg) {
+void Server::sendData(int fd, const std::vector<char> &msg) {
   size_t sent = 0;
-  size_t len = msg.length();
-  size_t max = msg.length();
+  size_t len = msg.size();
+  size_t max = msg.size();
   while (sent < len) {
     sent = len - sent;
     len = sent;
-    if (sendall(fd, msg.substr(max - len).c_str(), &sent) == -1) {
+    if (sendall(fd, &msg.data()[max - len], &sent) == -1) {
       std::cerr << "send failed\n";
     }
   }

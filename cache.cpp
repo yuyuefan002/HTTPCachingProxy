@@ -42,12 +42,12 @@ Cache::Cache() {
 }
 // original problem: cannot open a file has the samename as a path
 // pass unit test
-void Cache::store(const std::string &url, const std::string &msg) {
+void Cache::store(const std::string &url, const std::vector<char> &msg) {
   std::ofstream ofs;
   std::string path = parseURL(url);
   createIndex(path);
   ofs.open(path, std::ofstream::out | std::ofstream::trunc);
-  ofs << msg;
+  ofs << msg.data();
   ofs.close();
 }
 

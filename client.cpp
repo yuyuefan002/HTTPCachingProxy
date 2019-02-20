@@ -98,7 +98,7 @@ std::vector<char> Client::recvall(int fd) {
   }
   return msg;
 }
-std::string Client::recvGETResponse() { return recvall(sockfd).data(); }
+std::vector<char> Client::recvGETResponse() { return recvall(sockfd); }
 
 void Client::POST(std::string msg) {
   size_t sent = 0;

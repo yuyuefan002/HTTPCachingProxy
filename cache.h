@@ -7,6 +7,7 @@
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <vector>
 class Cache {
 private:
   Helper helper;
@@ -16,7 +17,7 @@ private:
 
 public:
   Cache();
-  void store(const std::string &url, const std::string &msg);
+  void store(const std::string &url, const std::vector<char> &msg);
   std::string read(const std::string &url);
   bool check(const std::string &url);
 };

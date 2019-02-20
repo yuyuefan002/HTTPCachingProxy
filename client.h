@@ -24,7 +24,7 @@ private:
 public:
   Client(const char *h, const char *p);
   ~Client();
-  std::string recvGETResponse();
+  std::vector<char> recvGETResponse();
   void GET(std::string msg);
   void POST(std::string msg);
 };

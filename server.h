@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <vector>
 #define MAXDATASIZE 100
 typedef struct addrinfo addrinfo;
 typedef struct sockaddr_storage sockaddr_storage;
@@ -25,6 +26,6 @@ public:
   ~Server();
   int acceptNewConn();
   std::string receiveHTTPRequest(int fd);
-  void sendData(int fd, std::string msg);
+  void sendData(int fd, const std::vector<char> &msg);
 };
 #endif
