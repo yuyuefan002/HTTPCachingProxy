@@ -9,15 +9,14 @@
 #include <iostream>
 class Proxy {
 private:
-  int newfd;
   Server server;
-  void GET_handler(HTTParser &httparser);
+  void GET_handler(HTTParser &httparser, int newfd);
   void CONNECT_handler(HTTParser &httparser);
 
 public:
   Proxy(const char *port);
   ~Proxy();
-  void accNewRequest();
-  void handler();
+  int accNewRequest();
+  void handler(int newfd);
 };
 #endif

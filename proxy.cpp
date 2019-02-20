@@ -1,6 +1,6 @@
 #include "proxy.h"
 
-void Proxy::GET_handler(HTTParser &httparser) {
+void Proxy::GET_handler(HTTParser &httparser, int newfd) {
   Cache cache;
   std::string url = httparser.getURL();
   if (cache.check(url)) {
@@ -29,20 +29,21 @@ void Proxy::GET_handler(HTTParser &httparser) {
   std::cout << "new response send\n";
 }
 void Proxy::CONNECT_handler(HTTParser &httparser) { httparser.getHostName(); }
-void Proxy::accNewRequest() {
-  newfd = server.acceptNewConn();
+int Proxy::accNewRequest() {
+  int newfd = server.acceptNewConn();
   if (newfd < 0)
     std::cerr << "Fail to accept a new request\n";
+  return newfd;
 }
-void Proxy::handler() {
+void Proxy::handler(int newfd) {
   std::string HTTPRequest = server.receiveHTTPRequest(newfd);
   std::cout << HTTPRequest;
   HTTParser httparser(HTTPRequest);
   if (httparser.getMethod() == "GET")
-    GET_handler(httparser);
+    GET_handler(httparser, newfd);
   else {
     //    CONNECT_handler(httparser);
   }
 }
 Proxy::Proxy(const char *port) : server(port) {}
-Proxy::~Proxy() { close(newfd); }
+Proxy::~Proxy() {}

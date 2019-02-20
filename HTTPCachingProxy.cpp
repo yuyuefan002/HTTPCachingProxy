@@ -9,13 +9,15 @@ int main(int argc, char **argv) {
   }
   Proxy proxy(argv[1]);
   while (1) {
-    proxy.accNewRequest();
+    int newfd = proxy.accNewRequest();
     int pid;
     if ((pid = fork() == 0)) {
-      proxy.handler();
+      proxy.handler(newfd);
+      close(newfd);
       return EXIT_SUCCESS; // we could not use exit here, because resources
       // cannot be released gracefully.
     }
+    close(newfd);
   }
   return EXIT_SUCCESS;
 }
