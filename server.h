@@ -1,5 +1,6 @@
 #ifndef __SERVER_H__
 #define __SERVER_H__
+#include <algorithm>
 #include <arpa/inet.h>
 #include <cstring>
 #include <iostream>
@@ -18,14 +19,14 @@ private:
   const char *port;
   addrinfo host_info;
   int listener;
-  std::string recvall(int fd);
+  std::vector<char> recvall(int fd);
   int sendall(int fd, const char *buf, size_t *len);
 
 public:
   Server(const char *p);
   ~Server();
   int acceptNewConn();
-  std::string receiveHTTPRequest(int fd);
+  std::vector<char> receiveHTTPRequest(int fd);
   void sendData(int fd, const std::vector<char> &msg);
 };
 #endif

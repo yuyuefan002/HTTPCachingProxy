@@ -4,11 +4,13 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 class HTTParser {
 private:
   Helper helper;
   int errnum;
   std::string HTTPRequest;
+  std::vector<char> HTTPRequest_char;
   std::string method;
   std::string protocol;
   std::string path;
@@ -24,12 +26,12 @@ private:
   std::string updateHTTPRequest(std::string request);
 
 public:
-  HTTParser(std::string r);
+  HTTParser(const std::vector<char> &r);
   ~HTTParser();
   int errorDetection();
   std::string getHostName();
   std::string getHostPort();
-  std::string getRequest();
+  std::vector<char> getRequest();
   std::string getMethod();
   std::string getURL();
   bool good4Cache();

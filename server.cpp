@@ -42,17 +42,20 @@ int Server::acceptNewConn() {
   }
   return newfd;
 }
-std::string Server::recvall(int fd) {
-  std::string msg;
-  while (msg.find("\r\n\r\n") == std::string::npos) {
-    char buf[MAXDATASIZE] = "";
+std::vector<char> Server::recvall(int fd) {
+  vector<char> msg;
+  size_t index = 0;
+  std::vector<char> pattern{'\r', '\n', '\r', '\n'};
+  while (std::search(msg.begin(), msg.end(), pattern.begin(), pattern.end()) ==
+         msg.end()) {
+    if (msg.size() < index + MAXDATASIZE)
+      msg.resize(index + MAXDATASIZE);
     int nbytes;
-    if ((nbytes = recv(fd, buf, MAXDATASIZE - 1, 0)) == -1) {
+    if ((nbytes = recv(fd, &msg.data()[index], MAXDATASIZE - 1, 0)) == -1) {
       std::cerr << "recv failed\n";
       exit(EXIT_FAILURE);
     } else {
-      buf[nbytes] = '\0';
-      msg.append(buf);
+      index += nbytes;
     }
   }
   return msg;
@@ -75,7 +78,7 @@ int Server::sendall(int fd, const char *buf, size_t *len) {
 
   return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
 }
-std::string Server::receiveHTTPRequest(int fd) { return recvall(fd); }
+std::vector<char> Server::receiveHTTPRequest(int fd) { return recvall(fd); }
 void Server::sendData(int fd, const std::vector<char> &msg) {
   size_t sent = 0;
   size_t len = msg.size();

@@ -7,7 +7,7 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
     std::vector<char> HTTPResponse = cache.read(url);
     std::cout << "in cache\n";
     HTTPRSPNSParser httprspnsparser(HTTPResponse);
-    if (httprspnsparser.stillfresh()) {
+    if (httparser.good4Cache() && httprspnsparser.stillfresh()) {
       server.sendData(newfd, httprspnsparser.getResponse());
       close(newfd);
       return;
@@ -18,9 +18,8 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
   Client client(hostname.c_str(),
                 port.c_str()); // have to check success or not, if failed,
                                // return 503,important
-  std::cout << httparser.getRequest();
   client.GET(httparser.getRequest());
-  std::vector<char> HTTPResponse = client.recvGETResponse();
+  std::vector<char> HTTPResponse = client.recvServeResponse();
 
   HTTPRSPNSParser httprspnsparser(HTTPResponse);
   if (httprspnsparser.getStatusCode() == 200 && httprspnsparser.good4Cache() &&
@@ -37,8 +36,8 @@ int Proxy::accNewRequest() {
   return newfd;
 }
 void Proxy::handler(int newfd) {
-  std::string HTTPRequest = server.receiveHTTPRequest(newfd);
-  std::cout << HTTPRequest;
+  std::vector<char> HTTPRequest = server.receiveHTTPRequest(newfd);
+  std::cout << HTTPRequest.data();
   HTTParser httparser(HTTPRequest);
   if (httparser.getMethod() == "GET")
     GET_handler(httparser, newfd);

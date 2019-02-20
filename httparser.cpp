@@ -44,9 +44,7 @@ bool HTTParser::good4Cache() {
     std::string age_str = headers["cache-control"].substr(target);
     for (i = 0; age_str[i] != ' ' && i < age_str.length(); i++) {
     }
-
     int age = stoi(age_str.substr(8, i));
-
     if (age == 0)
       return false;
   }
@@ -96,7 +94,7 @@ std::string HTTParser::updateHTTPath(std::string &path) {
     path.insert(0, host);
   return path;
 }
-HTTParser::HTTParser(std::string r) : HTTPRequest(r) {
+HTTParser::HTTParser(const std::vector<char> &r) : HTTPRequest(r.data()) {
   errnum = 0;
   int target = HTTPRequest.find("\r\n");
   std::string request = HTTPRequest.substr(0, target);
@@ -122,7 +120,10 @@ HTTParser::~HTTParser() {}
 int HTTParser::errorDetection() { return errnum; }
 std::string HTTParser::getHostName() { return host; }
 std::string HTTParser::getHostPort() { return port; }
-std::string HTTParser::getRequest() { return HTTPRequest; }
+std::vector<char> HTTParser::getRequest() {
+  std::vector<char> r(HTTPRequest.begin(), HTTPRequest.end());
+  return r;
+}
 std::string HTTParser::getMethod() { return method; }
 std::string HTTParser::getURL() { return path; } // valgrind clean
 /*
