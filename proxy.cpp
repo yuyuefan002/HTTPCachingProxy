@@ -8,7 +8,6 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
     std::cout << "in cache\n";
     HTTPRSPNSParser httprspnsparser(HTTPResponse);
     if (httprspnsparser.stillfresh()) {
-
       server.sendData(newfd, httprspnsparser.getResponse());
       close(newfd);
       return;
@@ -24,7 +23,8 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
   std::vector<char> HTTPResponse = client.recvGETResponse();
 
   HTTPRSPNSParser httprspnsparser(HTTPResponse);
-  if (httprspnsparser.getStatusCode() == 200 && httprspnsparser.good4Cache())
+  if (httprspnsparser.getStatusCode() == 200 && httprspnsparser.good4Cache() &&
+      httparser.good4Cache())
     cache.store(url, HTTPResponse);
   server.sendData(newfd, HTTPResponse);
   std::cout << "new response send\n";

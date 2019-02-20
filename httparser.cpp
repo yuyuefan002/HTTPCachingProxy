@@ -26,6 +26,32 @@ void HTTParser::parseHeader(std::string head) {
     headers[key] = value;
   }
 }
+
+bool HTTParser::good4Cache() {
+  if (headers.find("cache-control") == headers.end()) {
+    return true;
+  }
+  std::string ctlPolicy = headers["cache-control"];
+  if (ctlPolicy.find("private") != std::string::npos ||
+      ctlPolicy.find("no-cache") != std::string::npos ||
+      ctlPolicy.find("no-store") != std::string::npos) {
+    return false;
+  }
+  size_t target;
+  if ((target = headers["cache-control"].find("max-age")) !=
+      std::string::npos) {
+    size_t i;
+    std::string age_str = headers["cache-control"].substr(target);
+    for (i = 0; age_str[i] != ' ' && i < age_str.length(); i++) {
+    }
+
+    int age = stoi(age_str.substr(8, i));
+
+    if (age == 0)
+      return false;
+  }
+  return true;
+}
 /*
  * status: incomplete
  * Errnum Mapping Table

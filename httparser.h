@@ -32,5 +32,6 @@ public:
   std::string getRequest();
   std::string getMethod();
   std::string getURL();
+  bool good4Cache();
 };
 #endif

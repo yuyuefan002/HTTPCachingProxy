@@ -11,7 +11,9 @@ void HTTPRSPNSParser::parseStatus(std::string statusline) {
 void HTTPRSPNSParser::parseHeader(std::string head) {
   while (!head.empty()) {
     std::string key = helper.tolower(helper.fetchNextSeg(head, ':'));
+
     std::string value = helper.fetchNextSeg(head, '\r', 2);
+
     headers[key] = value;
   }
 }
@@ -34,6 +36,7 @@ size_t HTTPRSPNSParser::getMaxAge() {
       for (i = 0; age_str[i] != ' ' && i < age_str.length(); i++) {
       }
       age = stoi(age_str.substr(9, i));
+
       return age;
     } else if ((target = headers["cache-control"].find("max-age")) !=
                std::string::npos) {
@@ -41,7 +44,9 @@ size_t HTTPRSPNSParser::getMaxAge() {
       std::string age_str = headers["cache-control"].substr(target);
       for (i = 0; age_str[i] != ' ' && i < age_str.length(); i++) {
       }
+
       age = stoi(age_str.substr(8, i));
+
       return age;
     }
   }
