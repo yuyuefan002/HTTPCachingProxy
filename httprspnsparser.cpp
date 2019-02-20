@@ -69,18 +69,34 @@ void HTTPRSPNSParser::updateAgeField() {
   if ((target = HTTPResponse.find("Age:")) != std::string::npos) {
     helper.deleteALine(HTTPResponse, target);
   }
-
+  //  std::vector<char> pattern;
+  std::vector<char> pattern = {'A', 'g', 'e', ':'};
+  auto it2 = std::search(HTTPResponse_char.begin(), HTTPResponse_char.end(),
+                         pattern.begin(), pattern.end());
+  if (it2 != HTTPResponse_char.end()) {
+    auto begin = it2;
+    while (*it2 != '\r') {
+      std::cout << *it2;
+      it2++;
+    }
+    auto end = it2 + 1;
+    HTTPResponse_char.erase(begin, end);
+  }
   std::stringstream ss;
   ss << "Age: " << getAge() << "\r\n";
   std::string Age = ss.str();
-  target = HTTPResponse.find("\r\n\r\n");
-  HTTPResponse.insert(target + 2, Age);
+  pattern = {'\r', '\n', '\r', '\n'};
+  auto it = std::search(HTTPResponse_char.begin(), HTTPResponse_char.end(),
+                        pattern.begin(), pattern.end());
+  it += 2;
+  HTTPResponse_char.insert(it, Age.begin(), Age.end());
 }
 // pass unit test
-HTTPRSPNSParser::HTTPRSPNSParser(std::string response) {
+HTTPRSPNSParser::HTTPRSPNSParser(std::vector<char> response) {
   if (response.empty())
     throw std::string("root dir");
-  HTTPResponse = response;
+  HTTPResponse = response.data();
+  HTTPResponse_char = response;
   int target = HTTPResponse.find("\r\n");
   std::string statusline = HTTPResponse.substr(0, target);
   parseStatus(statusline);
@@ -109,9 +125,9 @@ bool HTTPRSPNSParser::stillfresh() {
   size_t age = getAge();
   return maxage >= age;
 }
-std::string HTTPRSPNSParser::getResponse() {
+std::vector<char> HTTPRSPNSParser::getResponse() {
   updateAgeField();
-  return HTTPResponse;
+  return HTTPResponse_char;
 }
 /*
 int main() {

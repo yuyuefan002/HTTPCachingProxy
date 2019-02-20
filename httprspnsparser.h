@@ -1,15 +1,18 @@
 #ifndef __HTTPRSPNSPARSER_H__
 #define __HTTPRSPNSPARSER_H__
 #include "helper.h"
+#include <algorithm>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
 #include <time.h>
+#include <vector>
 class HTTPRSPNSParser {
 private:
   Helper helper;
   std::string HTTPResponse;
+  std::vector<char> HTTPResponse_char;
   std::string protocol;
   unsigned short version_major;
   unsigned short version_minor;
@@ -23,10 +26,10 @@ private:
   size_t getAge();
 
 public:
-  HTTPRSPNSParser(std::string response);
+  HTTPRSPNSParser(std::vector<char> response);
   size_t getStatusCode();
   bool good4Cache();
   bool stillfresh();
-  std::string getResponse();
+  std::vector<char> getResponse();
 };
 #endif

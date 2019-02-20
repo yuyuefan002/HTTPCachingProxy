@@ -55,8 +55,8 @@ void Cache::store(const std::string &url, const std::vector<char> &msg) {
  * suggestion: use read() after check()
  * problem here, ifstream only input oneline here, use loop to input all
  */
-std::string Cache::read(const std::string &url) {
-  std::string msg;
+std::vector<char> Cache::read(const std::string &url) {
+
   std::string path = parseURL(url);
   struct stat s;
   if (stat(path.c_str(), &s) == 0) {
@@ -64,10 +64,12 @@ std::string Cache::read(const std::string &url) {
       path += "/index.html";
     }
   }
-  std::ifstream t(path);
-  std::stringstream buf;
+  std::ifstream ifs(path, std::ios::binary);
+  std::vector<char> msg(std::istreambuf_iterator<char>{ifs}, {});
+
+  /*  std::stringstream buf;
   buf << t.rdbuf();
-  msg = buf.str();
+  msg = buf.str();*/
   return msg;
 }
 
