@@ -72,15 +72,14 @@ std::vector<char> Client::recvall(int fd) {
     if (nbytes == -1 && msg.empty()) {
       std::cerr << "recv failed\n";
       break;
-    } else if (nbytes == -1) {
+    } else if (nbytes <= 0) {
       break;
 
-    } else if (nbytes == 0) {
-      return std::vector<char>();
     } else {
       index += nbytes;
     }
   }
+  msg.resize(index);
   return msg;
 }
 std::vector<char> Client::recvServeResponse() { return recvall(sockfd); }
@@ -144,8 +143,10 @@ HTTP/1.1\r\nHost:rabihyounes.com\r\n\r\n"); std::cout << client.receiveHTTP();
 // recv data test
 /*
 int main() {
-  Client client("localhost", "8080");
-  std::string test = client.receiveHTTP();
-  std::cout << test << std::endl;
+  Client client("www.google.com", "443");
+  std::vector<char> msg = {'t', 'e', 's', 't'};
+  client.Send(msg);
+  std::vector<char> test = client.recvServeResponse();
+  std::cout << test.data() << std::endl;
 }
 */

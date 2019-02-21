@@ -134,17 +134,21 @@ void Proxy::CONNECT_handler(HTTParser &httparser, int newfd) {
     return;
   }
   // success
-  std::vector<char> r2 = client.recvServeResponse();
+  std::vector<char> s = {'r', 'e', 'a', 'd', 'y'};
+  client.Send(s);
+  //  int sockfd = client.getFD();
+  std::vector<char> msg;
+  msg = client.recvServeResponse();
   std::string r = "HTTP/1.1 200 OK\r\n\r\n";
   std::vector<char> HTTP200(r.begin(), r.end());
   server.sendData(newfd, HTTP200);
   // build connection
-  fd_set master;
-  int fdmax;
-  int serverfd = client.getFD();
-  preparetunnel(&master, fdmax, newfd, serverfd);
+  // fd_set master;
+  // int fdmax;
+  // int serverfd = client.getFD();
+  // preparetunnel(&master, fdmax, newfd, serverfd);
   // transition message
-  tunnelMode(master, fdmax, newfd, serverfd, server, client);
+  // tunnelMode(master, fdmax, newfd, serverfd, server, client);
   std::cout << "CONNECT end/n"; // clean up
 }
 
@@ -164,9 +168,9 @@ void Proxy::handler(int newfd) {
     HTTParser httparser(HTTPRequest);
     if (httparser.getMethod() == "GET")
       GET_handler(httparser, newfd);
-    // if (httparser.getMethod() == "CONNECT") {
-    // CONNECT_handler(httparser, newfd);
-    //}  else if (httparser.getMethod() == "POST")
+    else if (httparser.getMethod() == "CONNECT")
+      CONNECT_handler(httparser, newfd);
+    //  else if (httparser.getMethod() == "POST")
     // POST_handler(httparser, newfd);
   } catch (std::string e) {
   }

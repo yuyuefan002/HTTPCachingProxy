@@ -21,3 +21,4 @@ warning: pass unit test only means it behaves right when using it right.
 
 2/20
 1.parser could go wrong, string cannot equal null. should use exception to handle these situation
+2.very hard to debug why connect failed,now I know all my function is correct.

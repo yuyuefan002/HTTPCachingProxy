@@ -58,6 +58,7 @@ std::vector<char> Server::recvall(int fd) {
       index += nbytes;
     }
   }
+  msg.resize(index);
   return msg;
 }
 std::vector<char> Server::recvall2(int fd) {
