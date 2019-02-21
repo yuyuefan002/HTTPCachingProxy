@@ -24,6 +24,7 @@ private:
   int sendall(int fd, const char *buf, size_t *len);
 
 public:
+  Server();
   Server(const char *p);
   ~Server();
   int acceptNewConn();

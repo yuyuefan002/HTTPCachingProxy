@@ -17,6 +17,7 @@ private:
   void CONNECT_handler(HTTParser &httparser, int newfd);
 
 public:
+  Proxy();
   Proxy(const char *port);
   ~Proxy();
   int accNewRequest();

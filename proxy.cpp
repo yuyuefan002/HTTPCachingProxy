@@ -155,8 +155,8 @@ int Proxy::accNewRequest() {
   return newfd;
 }
 void Proxy::handler(int newfd) {
-  std::vector<char> HTTPRequest = server.receiveData(newfd);
   try {
+    std::vector<char> HTTPRequest = server.receiveData(newfd);
     HTTParser httparser(HTTPRequest);
     if (httparser.getMethod() == "GET")
       GET_handler(httparser, newfd);
@@ -167,8 +167,9 @@ void Proxy::handler(int newfd) {
     else if (httparser.getMethod() == "POST")
       POST_handler(httparser, newfd);
   } catch (std::string e) {
+    std::cerr << e << std::endl;
   }
 }
-
+Proxy::Proxy() : server() {}
 Proxy::Proxy(const char *port) : server(port) {}
 Proxy::~Proxy() {}
