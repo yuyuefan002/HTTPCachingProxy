@@ -62,7 +62,6 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
 void Proxy::POST_handler(HTTParser &httparser, int newfd) {
   std::string hostname = httparser.getHostName();
   std::string port = httparser.getHostPort();
-  std::cout << hostname << port << std::endl;
   Client client(hostname.c_str(),
                 port.c_str()); // have to check success or not, if failed,
                                // return 503,important
@@ -143,19 +142,8 @@ void Proxy::CONNECT_handler(HTTParser &httparser, int newfd) {
   int fdmax;
   int serverfd = client.getFD();
   preparetunnel(&master, fdmax, newfd, serverfd);
-  std::vector<char> msg;
-  try {
-    /*msg = server.receiveData(newfd);
-    client.Send(msg);
-    std::cout << "receive from browser\n";
-    msg = client.recvServeResponse();
-    server.sendData(newfd, msg);
-    std::cout << "receive from server\n";*/
-    tunnelMode(master, fdmax, newfd, serverfd, server, client);
-    std::cout << "CONNECT end/n"; // clean up
-  } catch (std::string e) {
-  }
   // transition message
+  tunnelMode(master, fdmax, newfd, serverfd, server, client);
 }
 
 /*
@@ -168,7 +156,8 @@ int Proxy::accNewRequest() {
   return newfd;
 }
 void Proxy::handler(int newfd) {
-  std::vector<char> HTTPRequest = server.receiveHTTPRequest(newfd);
+  // std::vector<char> HTTPRequest = server.receiveHTTPRequest(newfd);
+  std::vector<char> HTTPRequest = server.receiveData(newfd);
   std::cout << HTTPRequest.data();
   try {
     HTTParser httparser(HTTPRequest);
@@ -176,8 +165,8 @@ void Proxy::handler(int newfd) {
       GET_handler(httparser, newfd);
     else if (httparser.getMethod() == "CONNECT")
       CONNECT_handler(httparser, newfd);
-    //  else if (httparser.getMethod() == "POST")
-    // POST_handler(httparser, newfd);
+    else if (httparser.getMethod() == "POST")
+      POST_handler(httparser, newfd);
   } catch (std::string e) {
   }
 }
