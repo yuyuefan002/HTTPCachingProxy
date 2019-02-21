@@ -18,3 +18,6 @@ warning: pass unit test only means it behaves right when using it right.
 4.we should use connect timeout to end recv data from server, or it will be even slower
 5.when we use post, server will disconnect once?
 6.each post will happen after connect
+
+2/20
+1.parser could go wrong, string cannot equal null. should use exception to handle these situation

@@ -1,5 +1,9 @@
 #include "httparser.h"
-// pass unit test
+/*
+ * smartPort
+ * get the port if specified or 80
+ *
+ */
 std::string smartPort(std::string &msg) {
   size_t target;
   std::string port;
@@ -10,7 +14,10 @@ std::string smartPort(std::string &msg) {
     port = "80";
   return port;
 }
-// pass unit test
+/*
+ * parse statusline
+ * pass unit test
+ */
 void HTTParser::parseRequest(std::string request) {
   method = helper.fetchNextSeg(request);
   path = helper.fetchNextSeg(request);
@@ -18,6 +25,8 @@ void HTTParser::parseRequest(std::string request) {
   version_major = stoi(helper.fetchNextSeg(request, '.'));
   version_minor = stoi(helper.fetchNextSeg(request));
 }
+
+// parse header
 // pass unit test
 void HTTParser::parseHeader(std::string head) {
   while (!head.empty()) {
@@ -26,7 +35,11 @@ void HTTParser::parseHeader(std::string head) {
     headers[key] = value;
   }
 }
-
+/*
+ * good4Cache
+ * This function test whether the request says no cache
+ *
+ */
 bool HTTParser::good4Cache() {
   if (headers.find("cache-control") == headers.end()) {
     return true;
@@ -67,6 +80,12 @@ int HTTParser::verifyHeader() {
   }
   return 0;
 }
+/*
+ * updateHTTPRequest
+ * This function will delete port num, hostpath,http:// in the status line
+ *
+ * Test Status: need more test
+ */
 std ::string HTTParser::updateHTTPRequest(std::string request) {
   size_t target;
   size_t end = request.find("\r\n");
@@ -84,6 +103,9 @@ std ::string HTTParser::updateHTTPRequest(std::string request) {
   return request;
 }
 /*
+ * updateHTTPath
+ * generate the full path for a http request
+ *
  * status: need more test
  * currently pass unit test
  */
@@ -94,6 +116,13 @@ std::string HTTParser::updateHTTPath(std::string &path) {
     path.insert(0, host);
   return path;
 }
+
+/*
+ * initializer
+ * This funtion parse the http request
+ *
+ * Test Status:need more work
+ */
 HTTParser::HTTParser(const std::vector<char> &r) {
   if (r.empty())
     throw std::string("request empty");
@@ -121,13 +150,18 @@ HTTParser::~HTTParser() {}
  *
  */
 int HTTParser::errorDetection() { return errnum; }
+
 std::string HTTParser::getHostName() { return host; }
+
 std::string HTTParser::getHostPort() { return port; }
+
 std::vector<char> HTTParser::getRequest() {
   std::vector<char> r(HTTPRequest.begin(), HTTPRequest.end());
   return r;
 }
+
 std::string HTTParser::getMethod() { return method; }
+
 std::string HTTParser::getURL() { return path; } // valgrind clean
 /*
 int main() {
