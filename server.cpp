@@ -78,15 +78,13 @@ std::vector<char> Server::recvall2(int fd) {
     if (nbytes == -1 && msg.empty()) {
       std::cerr << "recv failed\n";
       break;
-    } else if (nbytes == -1) {
+    } else if (nbytes <= 0) {
       break;
-
-    } else if (nbytes == 0) {
-      return std::vector<char>();
     } else {
       index += nbytes;
     }
   }
+  msg.resize(index);
   return msg;
 }
 int Server::sendall(int fd, const char *buf, size_t *len) {

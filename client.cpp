@@ -50,7 +50,7 @@ void Client::Send(const std::vector<char> &msg) {
     len = sent;
     if (sendall(sockfd, &msg.data()[max - len], &sent) == -1) {
       std::cerr << "send failed\n";
-      exit(EXIT_FAILURE);
+      throw std::string("send failed");
     }
   }
 }

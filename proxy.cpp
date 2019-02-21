@@ -83,36 +83,37 @@ void preparetunnel(fd_set *master, int &fdmax, const int &clientfd,
   FD_SET(serverfd, master);
   fdmax = std::max(clientfd, serverfd);
 }
+
+/*
+ * tunnelmode
+ * This function just implement a select(), working as a tunnel transfer message
+ * between browser and original server
+ *
+ *
+ */
 void tunnelMode(fd_set &master, int &fdmax, const int &clientfd,
                 const int &serverfd, Server &server, Client &client) {
-  std::cout << "server:" << serverfd << std::endl;
-  std::cout << "client:" << clientfd << std::endl;
+  fd_set read_fds;
+  FD_ZERO(&read_fds);
   while (1) {
-    fd_set read_fds = master;
-    std::cout << "waiting\n";
+    read_fds = master;
     if (select(fdmax + 1, &read_fds, NULL, NULL, NULL) == -1) {
-      std::cerr << "select\n";
       break;
     }
-    for (int i = 0; i <= fdmax; i++) {
+    for (int i = fdmax; i >= 0; i--) {
       if (FD_ISSET(i, &read_fds)) {
-        std::cout << "select something" << i << "\n";
-        if (i == clientfd) {
-          std::vector<char> msg = server.receiveData(clientfd);
-          if (msg.empty()) {
-            std::cout << "client disconnect\n";
-            return;
-          }
-          std::cout << "browser sent:\n";
-          client.Send(msg);
-        } else if (i == serverfd) {
+        if (i == serverfd) {
           std::vector<char> msg = client.recvServeResponse();
           if (msg.empty()) {
-            std::cout << "server disconnect\n";
             return;
           }
-          std::cout << "server sent:\n";
           server.sendData(clientfd, msg);
+        } else if (i == clientfd) {
+          std::vector<char> msg = server.receiveData(clientfd);
+          if (msg.empty()) {
+            return;
+          }
+          client.Send(msg);
         }
       }
     }
@@ -134,22 +135,27 @@ void Proxy::CONNECT_handler(HTTParser &httparser, int newfd) {
     return;
   }
   // success
-  std::vector<char> s = {'r', 'e', 'a', 'd', 'y'};
-  client.Send(s);
-  //  int sockfd = client.getFD();
-  std::vector<char> msg;
-  msg = client.recvServeResponse();
   std::string r = "HTTP/1.1 200 OK\r\n\r\n";
   std::vector<char> HTTP200(r.begin(), r.end());
   server.sendData(newfd, HTTP200);
-  // build connection
-  // fd_set master;
-  // int fdmax;
-  // int serverfd = client.getFD();
-  // preparetunnel(&master, fdmax, newfd, serverfd);
+  // Build connection
+  fd_set master;
+  int fdmax;
+  int serverfd = client.getFD();
+  preparetunnel(&master, fdmax, newfd, serverfd);
+  std::vector<char> msg;
+  try {
+    /*msg = server.receiveData(newfd);
+    client.Send(msg);
+    std::cout << "receive from browser\n";
+    msg = client.recvServeResponse();
+    server.sendData(newfd, msg);
+    std::cout << "receive from server\n";*/
+    tunnelMode(master, fdmax, newfd, serverfd, server, client);
+    std::cout << "CONNECT end/n"; // clean up
+  } catch (std::string e) {
+  }
   // transition message
-  // tunnelMode(master, fdmax, newfd, serverfd, server, client);
-  std::cout << "CONNECT end/n"; // clean up
 }
 
 /*
