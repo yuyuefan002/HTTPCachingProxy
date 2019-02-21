@@ -1,23 +1,28 @@
 #include "proxy.h"
+
 /*
- * status:unfinished
- * handle Method GET
+ * handlebyCache
+ * use response in cache
+ *
  */
-void Proxy::GET_handler(HTTParser &httparser, int newfd) {
-  Cache cache;
+std::vector<char> Proxy::handlebyCache(Cache &cache, HTTParser &httparser) {
   std::string url = httparser.getURL();
   if (cache.check(url)) {
     std::vector<char> HTTPResponse = cache.read(url);
-    try {
-      HTTPRSPNSParser httprspnsparser(HTTPResponse);
-      if (httparser.good4Cache() && httprspnsparser.stillfresh()) {
-        server.sendData(newfd, httprspnsparser.getResponse());
-        close(newfd);
-        return;
-      }
-    } catch (std::string e) {
+    HTTPRSPNSParser httprspnsparser(HTTPResponse);
+    if (httparser.good4Cache() && httprspnsparser.stillfresh()) {
+      return httprspnsparser.getResponse();
     }
   }
+  return std::vector<char>();
+}
+
+/*
+ * fetchNewresponse
+ * ask original server for new response
+ */
+std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser) {
+  std::string url = httparser.getURL();
   std::string hostname = httparser.getHostName();
   std::string port = httparser.getHostPort();
   Client client(hostname.c_str(),
@@ -26,20 +31,30 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
   if (client.getError() == 1) {
     std::string r = "HTTP/1.1 503 Service Unavailable\r\n\r\n";
     std::vector<char> HTTP503(r.begin(), r.end());
-    server.sendData(newfd, HTTP503);
-    return;
+    return HTTP503;
   }
   client.Send(httparser.getRequest());
   std::vector<char> HTTPResponse = client.recvServeResponse();
-  try {
-    HTTPRSPNSParser httprspnsparser(HTTPResponse);
-    if (httprspnsparser.getStatusCode() == 200 &&
-        httprspnsparser.good4Cache() && httparser.good4Cache())
-      cache.store(url, HTTPResponse);
-  } catch (std::string e) {
-  }
+
+  HTTPRSPNSParser httprspnsparser(HTTPResponse);
+  if (httprspnsparser.getStatusCode() == 200 && httprspnsparser.good4Cache() &&
+      httparser.good4Cache())
+    cache.store(url, HTTPResponse);
+  return HTTPResponse;
+}
+
+/*
+ * status:complete
+ * handle Method GET
+ */
+void Proxy::GET_handler(HTTParser &httparser, int newfd) {
+  Cache cache;
+  std::vector<char> HTTPResponse = handlebyCache(cache, httparser);
+  if (HTTPResponse.empty())
+    HTTPResponse = fetchNewResponse(cache, httparser);
   server.sendData(newfd, HTTPResponse);
 }
+
 /*
  * status:unfinished
  * handle POST request
@@ -119,6 +134,7 @@ void Proxy::CONNECT_handler(HTTParser &httparser, int newfd) {
     return;
   }
   // success
+  std::vector<char> r2 = client.recvServeResponse();
   std::string r = "HTTP/1.1 200 OK\r\n\r\n";
   std::vector<char> HTTP200(r.begin(), r.end());
   server.sendData(newfd, HTTP200);
