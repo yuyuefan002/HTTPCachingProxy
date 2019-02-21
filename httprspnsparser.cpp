@@ -1,5 +1,11 @@
 #include "httprspnsparser.h"
-// pass unit test
+
+/*
+ * parseStatus
+ * This function parse the status line
+ *
+ * Test Status: pass unit test
+ */
 void HTTPRSPNSParser::parseStatus(std::string statusline) {
   protocol = helper.fetchNextSeg(statusline, '/');
   version_major = stoi(helper.fetchNextSeg(statusline, '.'));
@@ -7,7 +13,13 @@ void HTTPRSPNSParser::parseStatus(std::string statusline) {
   status_code = stoi(helper.fetchNextSeg(statusline));
   status_text = statusline;
 }
-// pass unit test
+
+/*
+ * parseHeader
+ * This function parse the header
+ *
+ * Test Status: pass unit test
+ */
 void HTTPRSPNSParser::parseHeader(std::string head) {
   while (!head.empty()) {
     std::string key = helper.tolower(helper.fetchNextSeg(head, ':'));
@@ -19,14 +31,17 @@ void HTTPRSPNSParser::parseHeader(std::string head) {
 }
 
 /*
+ * getMaxage
+ * This function get the Max lifttime of a cached http response
  * Description: Calcuelate the lifttime of a response
  *              first check "Cache-Control:max-age=N",
  *              if None, second check "Expires",
  *              if None, third check "Last-Modified".
- * status: no problem until now
+ * Test Status: no problem until now
  */
 size_t HTTPRSPNSParser::getMaxAge() {
   size_t age = 0;
+  // check "cache-control"
   if (headers.find("cache-control") != headers.end()) {
     size_t target;
     if ((target = headers["cache-control"].find("s-maxage")) !=
@@ -50,53 +65,69 @@ size_t HTTPRSPNSParser::getMaxAge() {
       return age;
     }
   }
+
+  // check "expires"
   if (headers.find("expires") != headers.end() &&
       headers.find("date") != headers.end()) {
     age = helper.HTTPTimeRange2Num(headers["expires"], headers["date"]);
-  } else if (headers.find("last-modified") != headers.end() &&
-             headers.find("date") != headers.end()) {
+  }
+  // infer a lifetime
+  else if (headers.find("last-modified") != headers.end() &&
+           headers.find("date") != headers.end()) {
     age = helper.HTTPTimeRange2Num(headers["date"], headers["last-modified"]);
     age /= 10;
   }
   return age;
 }
 
-// pass unit test
-// if this go wrong, check helper.HTTPAge
+/*
+ * getAge
+ * This function get the age of cached HTTP response
+ *
+ * Test Status: pass unit test
+ * if this go wrong, check helper.HTTPAge
+ */
 size_t HTTPRSPNSParser::getAge() {
   size_t age = 0;
   age = helper.HTTPAge(headers["date"]);
   return age;
 }
-// pass unit test
+
+/*
+ * updateAgeField
+ * This function update the Age field in cached HTTP response
+ *
+ * Test Status: pass unit test
+ */
 void HTTPRSPNSParser::updateAgeField() {
-  size_t target;
-  if ((target = HTTPResponse.find("Age:")) != std::string::npos) {
-    helper.deleteALine(HTTPResponse, target);
-  }
-  //  std::vector<char> pattern;
+
+  // delete old Age string
   std::vector<char> pattern = {'A', 'g', 'e', ':'};
-  auto it2 = std::search(HTTPResponse_char.begin(), HTTPResponse_char.end(),
-                         pattern.begin(), pattern.end());
-  if (it2 != HTTPResponse_char.end()) {
-    auto begin = it2;
-    while (*it2 != '\r') {
-      std::cout << *it2;
-      it2++;
-    }
-    auto end = it2 + 1;
-    HTTPResponse_char.erase(begin, end);
-  }
+  auto begin = std::search(HTTPResponse_char.begin(), HTTPResponse_char.end(),
+                           pattern.begin(), pattern.end());
+  if (begin != HTTPResponse_char.end())
+    HTTPResponse_char = helper.deleteALine(HTTPResponse_char, begin);
+
+  // generate new Age string
   std::stringstream ss;
   ss << "Age: " << getAge() << "\r\n";
   std::string Age = ss.str();
+
+  // insert new Age string
   pattern = {'\r', '\n', '\r', '\n'};
   auto it = std::search(HTTPResponse_char.begin(), HTTPResponse_char.end(),
                         pattern.begin(), pattern.end());
   it += 2;
   HTTPResponse_char.insert(it, Age.begin(), Age.end());
 }
-// pass unit test
+
+/*
+ * initializer
+ * This function will parse all data
+ *
+ * Test Status: pass unit test
+ */
+
 HTTPRSPNSParser::HTTPRSPNSParser(std::vector<char> response) {
   if (response.empty())
     throw std::string("root dir");

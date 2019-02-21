@@ -11,7 +11,8 @@ class Proxy {
 private:
   Server server;
   void GET_handler(HTTParser &httparser, int newfd);
-  void CONNECT_handler(HTTParser &httparser);
+  void POST_handler(HTTParser &httparser, int newfd);
+  void CONNECT_handler(HTTParser &httparser, int newfd);
 
 public:
   Proxy(const char *port);

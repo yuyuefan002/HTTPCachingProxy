@@ -8,7 +8,7 @@ const char *Client::getHost(const char *hostname) {
 // pass unit test
 Client::Client(const char *h, const char *p) : port(p) {
   hostname = getHost(h);
-
+  error = 0;
   addrinfo host_info;
   addrinfo *host_info_list;
 
@@ -36,6 +36,7 @@ Client::Client(const char *h, const char *p) : port(p) {
                  host_info_list->ai_addrlen)) == -1)
       throw std::string("connect");
   } catch (std::string e) {
+    error = 1;
     std::cerr << e << " failed\n";
   }
   freeaddrinfo(host_info_list);
@@ -61,7 +62,7 @@ int Client::sendall(int fd, const char *buf, size_t *len) {
   return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
 }
 // pass unit test
-void Client::GET(const std::vector<char> &msg) {
+void Client::Send(const std::vector<char> &msg) {
   size_t sent = 0;
   size_t len = msg.size();
   size_t max = msg.size();
@@ -90,24 +91,25 @@ std::vector<char> Client::recvall(int fd) {
     } else if (nbytes == -1) {
       break;
 
-    } else if (nbytes == 0)
-      break;
-    else {
+    } else if (nbytes == 0) {
+      return std::vector<char>();
+    } else {
       index += nbytes;
     }
   }
   return msg;
 }
 std::vector<char> Client::recvServeResponse() { return recvall(sockfd); }
-
+int Client::getError() { return error; }
+int Client::getFD() { return sockfd; }
 // initializer test
 /*int main() { Client client("localhost", "8080"); }*/
 // sendData test
 // valgrind clean
 /*int main() {
   Client client("rabihyounes.com", "80");
-  client.sendData("GET /awesome.txt HTTP/1.1\r\nHost:rabihyounes.com\r\n\r\n");
-  std::cout << client.receiveHTTP();
+  client.sendData("GET /awesome.txt
+HTTP/1.1\r\nHost:rabihyounes.com\r\n\r\n"); std::cout << client.receiveHTTP();
 }
 */
 // recv data test

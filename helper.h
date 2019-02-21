@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <vector>
 class Helper {
 public:
   std::string trimLeadingSpace(std::string &msg);
@@ -13,7 +14,8 @@ public:
   int wdayTable(std::string wday);
   int monTable(std::string mon);
   double HTTPTimeRange2Num(std::string end, std::string start);
-  std::string deleteALine(std::string msg, size_t start);
+  std::vector<char> deleteALine(std::vector<char> &msg,
+                                std::vector<char>::iterator begin);
   size_t HTTPAge(std::string date);
 };
 #endif

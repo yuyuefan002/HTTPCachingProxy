@@ -3,6 +3,7 @@ using namespace std;
 Server::Server(const char *p) : port(p) {
   const char *hostname = NULL;
   addrinfo *host_info_list;
+
   memset(&host_info, 0, sizeof(host_info));
 
   host_info.ai_family = AF_UNSPEC;
@@ -18,7 +19,7 @@ Server::Server(const char *p) : port(p) {
 
     int yes = 1;
     setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-
+    // set recv timeout
     if (bind(listener, host_info_list->ai_addr, host_info_list->ai_addrlen) ==
         -1)
       throw std::string("bind");
@@ -51,16 +52,42 @@ std::vector<char> Server::recvall(int fd) {
     if (msg.size() < index + MAXDATASIZE)
       msg.resize(index + MAXDATASIZE);
     int nbytes;
-    if ((nbytes = recv(fd, &msg.data()[index], MAXDATASIZE - 1, 0)) == -1) {
-      std::cerr << "recv failed\n";
-      exit(EXIT_FAILURE);
+    if ((nbytes = recv(fd, &msg.data()[index], MAXDATASIZE - 1, 0)) <= 0) {
+      return std::vector<char>();
     } else {
       index += nbytes;
     }
   }
   return msg;
 }
+std::vector<char> Server::recvall2(int fd) {
+  // set recv timeout
+  timeval tv;
+  tv.tv_sec = 1;
+  tv.tv_usec = 0;
+  if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof tv))
+    throw std::string("setsockopt");
+  std::vector<char> msg;
+  size_t index = 0;
+  int nbytes;
+  while (1) {
+    if (msg.size() < index + MAXDATASIZE)
+      msg.resize(index + MAXDATASIZE);
+    nbytes = recv(fd, &msg.data()[index], MAXDATASIZE - 1, 0);
+    if (nbytes == -1 && msg.empty()) {
+      std::cerr << "recv failed\n";
+      break;
+    } else if (nbytes == -1) {
+      break;
 
+    } else if (nbytes == 0) {
+      return std::vector<char>();
+    } else {
+      index += nbytes;
+    }
+  }
+  return msg;
+}
 int Server::sendall(int fd, const char *buf, size_t *len) {
   size_t total = 0;     // how many bytes we've sent
   int bytesleft = *len; // how many we have left to send
@@ -79,6 +106,7 @@ int Server::sendall(int fd, const char *buf, size_t *len) {
   return n == -1 ? -1 : 0; // return -1 on failure, 0 on success
 }
 std::vector<char> Server::receiveHTTPRequest(int fd) { return recvall(fd); }
+std::vector<char> Server::receiveData(int fd) { return recvall2(fd); }
 void Server::sendData(int fd, const std::vector<char> &msg) {
   size_t sent = 0;
   size_t len = msg.size();

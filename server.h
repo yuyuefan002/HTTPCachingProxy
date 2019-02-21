@@ -20,6 +20,7 @@ private:
   addrinfo host_info;
   int listener;
   std::vector<char> recvall(int fd);
+  std::vector<char> recvall2(int fd);
   int sendall(int fd, const char *buf, size_t *len);
 
 public:
@@ -27,6 +28,7 @@ public:
   ~Server();
   int acceptNewConn();
   std::vector<char> receiveHTTPRequest(int fd);
+  std::vector<char> receiveData(int fd);
   void sendData(int fd, const std::vector<char> &msg);
 };
 #endif

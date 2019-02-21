@@ -16,6 +16,7 @@ class Client {
 private:
   const char *hostname;
   const char *port;
+  int error;
   int sockfd;
   const char *getHost(const char *hostname);
   std::vector<char> recvall(int fd);
@@ -25,6 +26,8 @@ public:
   Client(const char *h, const char *p);
   ~Client();
   std::vector<char> recvServeResponse();
-  void GET(const std::vector<char> &msg);
+  void Send(const std::vector<char> &msg);
+  int getError();
+  int getFD();
 };
 #endif

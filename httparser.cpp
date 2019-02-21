@@ -94,7 +94,10 @@ std::string HTTParser::updateHTTPath(std::string &path) {
     path.insert(0, host);
   return path;
 }
-HTTParser::HTTParser(const std::vector<char> &r) : HTTPRequest(r.data()) {
+HTTParser::HTTParser(const std::vector<char> &r) {
+  if (r.empty())
+    throw std::string("request empty");
+  HTTPRequest = r.data();
   errnum = 0;
   int target = HTTPRequest.find("\r\n");
   std::string request = HTTPRequest.substr(0, target);

@@ -1,7 +1,10 @@
 #include "helper.h"
 /*
+ * trimleadingspace
+ * This function can delete all leading space in a string
+ *
  * warning: this function will motify original string
- * pass unit test
+ * Test Status: pass unit test
  */
 std::string Helper::trimLeadingSpace(std::string &msg) {
   if (msg.empty())
@@ -11,7 +14,13 @@ std::string Helper::trimLeadingSpace(std::string &msg) {
     return msg;
   return msg.substr(target);
 }
-// pass unit test
+/*
+ * fetchnextseg
+ * This function can fetch next segment, split by c.
+ *
+ * warning: this function will motify original string
+ * Test Status: pass unit test
+ */
 std::string Helper::fetchNextSeg(std::string &msg, char c, size_t substrlen) {
   msg = trimLeadingSpace(msg);
   size_t target = msg.find(c);
@@ -23,6 +32,12 @@ std::string Helper::fetchNextSeg(std::string &msg, char c, size_t substrlen) {
 
   return res;
 }
+/*
+ * tolower
+ * This function can let all char in a string be lower char.
+ *
+ * Test Status: pass unit test
+ */
 std::string Helper::tolower(const std::string &msg) {
   std::string res;
   for (auto c : msg) {
@@ -30,12 +45,25 @@ std::string Helper::tolower(const std::string &msg) {
   }
   return res;
 }
+/*
+ * wdayTable
+ * This function maps all weekdays with number
+ *
+ * Test Status: pass unit test
+ */
 int Helper::wdayTable(std::string wday) {
   std::map<std::string, int> w = {{"Sun", 0}, {"Mon", 1}, {"Tue", 2},
                                   {"Wed", 3}, {"Thu", 4}, {"Fri", 5},
                                   {"Sat", 6}};
   return w[wday];
 }
+
+/*
+ * monTable
+ * This function maps all month with number
+ *
+ * Test Status: pass unit test
+ */
 int Helper::monTable(std::string mon) {
   std::map<std::string, int> m = {
       {"Jan", 0}, {"Feb", 1}, {"Mar", 2}, {"Apr", 3}, {"May", 4},  {"Jun", 5},
@@ -43,10 +71,12 @@ int Helper::monTable(std::string mon) {
   return m[mon];
 }
 /*
- * status: complete
- * problem: after difftime, end_tm.tm_hour will increase 1, cannot resolve
+ * HTTPTimerange2num
+ * This function can calculate the time range between two HTTP TIME
+ *
+ * past problem: after difftime, end_tm.tm_hour will increase 1, cannot resolve
  * solution: set tm_isdst
- * pass unit test
+ * Test Status:pass unit test
  */
 double Helper::HTTPTimeRange2Num(std::string end, std::string start) {
   double seconds;
@@ -78,12 +108,13 @@ double Helper::HTTPTimeRange2Num(std::string end, std::string start) {
   seconds = difftime(mktime(&end_tm), mktime(&start_tm));
   return seconds;
 }
-/* pass unit test
+/*
+ * HTTPAge
+ * This function can calculate the diff between now and HTTP time data
+ *
  * warning: something unsure may happen, currently usring gmt time,
  *          i don't know how difftime works, will it change
  *          timezone automatically?
- *
- *
  */
 size_t Helper::HTTPAge(std::string date) {
   size_t seconds;
@@ -104,11 +135,14 @@ size_t Helper::HTTPAge(std::string date) {
   seconds = difftime(mktime(ptm), mktime(&date_tm));
   return seconds;
 }
-std::string Helper::deleteALine(std::string msg, size_t date) {
-  size_t end = date;
-  while (msg[end] != '\n')
-    end++;
-  msg.erase(date, end + 1 - date);
+std::vector<char> Helper::deleteALine(std::vector<char> &msg,
+                                      std::vector<char>::iterator begin) {
+  std::vector<char>::iterator it = begin;
+  while (*it != '\n') {
+    it++;
+  }
+  auto end = it + 1;
+  msg.erase(begin, end);
   return msg;
 }
 /*
@@ -117,9 +151,11 @@ int main() {
   //  std::cout << helper.HTTPTimeRange2Num("Fri, 08 Feb 2019 18:44:41 GMT",
   //                                     "Fri, 08 Feb 2019 18:43:41 GMT")
   //<< std::endl;
-  std::cout << helper.HTTPAge("Date: Mon, 18 Feb 2019 20:55:11 GMT");
-  // std::cout <<
-  // helper.deleteALine("asd\r\ndelete\r\nA
-  // new line\r\n", 5);
+  // std::cout << helper.HTTPAge("Date: Mon, 18 Feb 2019 20:55:11 GMT");
+  std::vector<char> R = {'a',  's',  'd', '\r', '\n', 'a',  's', 'd',
+                         '\r', '\n', 'a', 's',  'd',  '\r', '\n'};
+  std::vector<char>::iterator it = R.begin();
+  R = helper.deleteALine(R, it);
+  std::cout << R.data();
 }
 */
