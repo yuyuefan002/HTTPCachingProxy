@@ -19,7 +19,7 @@ private:
 public:
   void newRequest(std::string statusLine, std::string clientip);
   void checkCache();
-  void contactServer();
+  void contactServer(std::string statusLine, std::string serverName);
   void hereFromServer();
   void respondClient();
   void closeTunnel();

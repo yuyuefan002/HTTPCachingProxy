@@ -18,5 +18,7 @@ void Log::newRequest(std::string statusLine, std::string clientip) {
 
 void Log::checkCache() {}
 
+void Log::contactServer(std::string statusLine, std::string serverName) {}
+
 Log::Log(int id) : requestid(id) {}
 Log::~Log() {}

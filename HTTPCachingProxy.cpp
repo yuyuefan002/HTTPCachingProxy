@@ -15,8 +15,13 @@ int main(int argc, char **argv) {
     std::cerr << "Usage: HTTPCachingProxy <port>\n";
     exit(EXIT_FAILURE);
   }
+<<<<<<< HEAD
   // std::thread threads[THREADNUM];
   daemon(0, 0);
+=======
+
+  /* daemon(0, 0);
+>>>>>>> c8e852f60a364c1dcd9d2725bc0220e4193df367
   umask(0);
   pid_t pid = fork();
   if (pid < 0) {
@@ -24,8 +29,14 @@ int main(int argc, char **argv) {
   }
   if (pid > 0) {
     return EXIT_SUCCESS;
+<<<<<<< HEAD
   }
   /*  int i = 0;
+=======
+    }*/
+  /*std::thread threads[THREADNUM];
+  int i = 0;
+>>>>>>> c8e852f60a364c1dcd9d2725bc0220e4193df367
   Proxy proxy(argv[1]);
   while (1) {
     int newfd = proxy.accNewRequest();
@@ -35,7 +46,9 @@ int main(int argc, char **argv) {
         threads[i].join();
       }
       i = 0;
-      }*/
+    }
+  }*/
+
   Proxy proxy(argv[1]);
   while (1) {
     int newfd = proxy.accNewRequest();
