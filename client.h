@@ -9,7 +9,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <vector>
-#define MAXDATASIZE 100
+#define MAXDATASIZE 65536
 typedef struct addrinfo addrinfo;
 typedef struct timeval timeval;
 class Client {

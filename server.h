@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
-#define MAXDATASIZE 100
+#define MAXDATASIZE 65536
 typedef struct addrinfo addrinfo;
 typedef struct sockaddr_storage sockaddr_storage;
 typedef struct sockaddr sockaddr;
