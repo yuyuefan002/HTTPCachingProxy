@@ -1,1 +1,52 @@
 HTTP caching proxy
+
+1.Description
+This is a HTTP proxy functioning with GET, POST and CONNECT.
+It is implemented in C++ and using multi-thread to handle with concurrency.
+You may find hte log info under the path /var/log/erss/proxy.log.
+To handle with request or response error, the proxy will return corresponding status code like 400, 502 and 503.
+
+2.Techniqual Detail:
+Class helper: This class contains some basic helper functions to handle strings.
+Class client: This class acts as a socket client. We can use this class to connect server(in this case, origin server), send message to server and receive message from server.
+Class server: This class acts as a socket server. We can use this class to accept new socket connect(in this case, browser), send message to browser and receive message from browser.
+Class httparser: This class can parse http request, it can get METHOD,PATH,PROTOCOL,VERSION,HEADERS.
+Class httprspnsparser: This class can parser http response, it can get PROTOCOL,VERSION, STATUS CODE,STATUS TEXT,HEADERS and BODY
+Class log: This class can automatically generate formated log info.
+Class cache: This class can store and read GET response in and from local file system.
+Class proxy: This is a class handle all GET,POST and CONNECT requests.
+
+How to handle GET?
+       	      get URI----In Cache?
+	      	     yes /      \no
+		        /        \
+		 Still fresh?  ask origin server
+              yes/      \no            |
+	        /        \             |
+	   response    revalidate    Caccheable?
+	           304/     \others  yes/    \no
+		     /       \         /      \
+		  response refetch response&  response
+			             store
+How to handle POST?
+
+        browser send request---->send to origin server---->receive from origin server
+		     		      	 			   	       |
+									       |
+									       |
+				                           send to browser  <---
+How to handle CONNECT?
+
+      browser send request
+      	      |
+	      |
+	      |
+    connect to origin server
+    	      |
+	      |
+	      |
+    browser<---->origin server
+              |
+	      |
+	      |
+      close all connection
