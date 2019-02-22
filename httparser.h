@@ -14,6 +14,7 @@ private:
   std::string method;
   std::string protocol;
   std::string path;
+  std::string statusline;
   unsigned short version_major;
   unsigned short version_minor;
   std::string host;
@@ -34,6 +35,7 @@ public:
   std::vector<char> getRequest();
   std::string getMethod();
   std::string getURL();
+  std::string getStatusLine();
   bool good4Cache();
 };
 #endif

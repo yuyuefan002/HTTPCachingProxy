@@ -31,5 +31,7 @@ public:
   bool good4Cache();
   bool stillfresh();
   std::vector<char> getResponse();
+  std::string getLastModified();
+  std::string getETag();
 };
 #endif

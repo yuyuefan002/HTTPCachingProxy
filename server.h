@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <vector>
-#define MAXDATASIZE 100
+#define MAXDATASIZE 65536
 typedef struct addrinfo addrinfo;
 typedef struct sockaddr_storage sockaddr_storage;
 typedef struct sockaddr sockaddr;
@@ -24,6 +24,7 @@ private:
   int sendall(int fd, const char *buf, size_t *len);
 
 public:
+  Server();
   Server(const char *p);
   ~Server();
   int acceptNewConn();

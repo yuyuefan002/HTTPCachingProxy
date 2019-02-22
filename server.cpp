@@ -28,7 +28,7 @@ Server::Server(const char *p) : port(p) {
   } catch (std::string e) {
     std::cerr << "Error: " << e << " failed" << std::endl;
     freeaddrinfo(host_info_list);
-    exit(EXIT_FAILURE);
+    throw std::string("server init");
   }
   freeaddrinfo(host_info_list);
 }
@@ -38,8 +38,7 @@ int Server::acceptNewConn() {
   socklen_t socket_addr_len = sizeof socket_addr;
   int newfd = accept(listener, (sockaddr *)&socket_addr, &socket_addr_len);
   if (newfd == -1) {
-    std::cerr << "accept failed\n";
-    return -1;
+    throw std::string("accept failed");
   }
   return newfd;
 }
@@ -118,4 +117,5 @@ void Server::sendData(int fd, const std::vector<char> &msg) {
     }
   }
 }
+Server::Server() {}
 Server::~Server() { close(listener); }

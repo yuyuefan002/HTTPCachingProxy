@@ -49,7 +49,6 @@ void Client::Send(const std::vector<char> &msg) {
     sent = len - sent;
     len = sent;
     if (sendall(sockfd, &msg.data()[max - len], &sent) == -1) {
-      std::cerr << "send failed\n";
       throw std::string("send failed");
     }
   }
@@ -125,7 +124,6 @@ Client::Client(const char *h, const char *p) : port(p) {
       throw std::string("connect");
   } catch (std::string e) {
     error = 1;
-    std::cerr << e << " failed\n";
   }
   freeaddrinfo(host_info_list);
 }

@@ -129,8 +129,8 @@ HTTParser::HTTParser(const std::vector<char> &r) {
   HTTPRequest = r.data();
   errnum = 0;
   int target = HTTPRequest.find("\r\n");
-  std::string request = HTTPRequest.substr(0, target);
-  parseRequest(request);
+  statusline = HTTPRequest.substr(0, target);
+  parseRequest(statusline);
   int head_end = HTTPRequest.find("\r\n\r\n");
   std::string head = HTTPRequest.substr(target + 2, head_end - target - 2);
   parseHeader(head);
@@ -163,6 +163,8 @@ std::vector<char> HTTParser::getRequest() {
 std::string HTTParser::getMethod() { return method; }
 
 std::string HTTParser::getURL() { return path; } // valgrind clean
+
+std::string HTTParser::getStatusLine() { return statusline; }
 /*
 int main() {
   std::string HTTPRequest =

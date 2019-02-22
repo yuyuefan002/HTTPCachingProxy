@@ -2,6 +2,7 @@
 #define __PROXY_H__
 #include "cache.h"
 #include "client.h"
+#include "http.h"
 #include "httparser.h"
 #include "httprspnsparser.h"
 #include "log.h"
@@ -18,6 +19,7 @@ private:
   void CONNECT_handler(HTTParser &httparser, int newfd);
 
 public:
+  Proxy();
   Proxy(const char *port);
   ~Proxy();
   int accNewRequest();

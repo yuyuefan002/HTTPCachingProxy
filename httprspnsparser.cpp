@@ -130,7 +130,7 @@ void HTTPRSPNSParser::updateAgeField() {
 
 HTTPRSPNSParser::HTTPRSPNSParser(std::vector<char> response) {
   if (response.empty())
-    throw std::string("root dir");
+    throw std::string("no response");
   HTTPResponse = response.data();
   HTTPResponse_char = response;
   int target = HTTPResponse.find("\r\n");
@@ -161,9 +161,22 @@ bool HTTPRSPNSParser::stillfresh() {
   size_t age = getAge();
   return maxage >= age;
 }
+
 std::vector<char> HTTPRSPNSParser::getResponse() {
   updateAgeField();
   return HTTPResponse_char;
+}
+
+std::string HTTPRSPNSParser::getLastModified() {
+  if (headers.find("last-modified") == headers.end())
+    return std::string();
+  return headers["last-modified"];
+}
+
+std::string HTTPRSPNSParser::getETag() {
+  if (headers.find("etag") == headers.end())
+    return "*";
+  return headers["etag"];
 }
 /*
 int main() {
