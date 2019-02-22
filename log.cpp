@@ -6,3 +6,35 @@ void Log::save(std::string msg) {
   outfile << msg << std::endl;
   outfile.close();
 }
+
+void Log::newRequest(std::string statusLine, std::string clientip) {
+  auto now = std::chrono::system_clock::now();
+  time_t t = std::chrono::system_clock::to_time_t(now);
+  char *time = ctime(&t);
+  std::string msg = std::to_string(requestid) + ": " + statusLine + " from " +
+                    clientip + std::string(time);
+  save(msg);
+}
+
+void Log::checkCache() {}
+
+void Log::reqFromServer(std::string statusLine, std::string serverName) {
+  std::string msg = std::to_string(requestid) + ": Requesting " + statusLine +
+                    " from " + serverName;
+  save(msg);
+}
+
+void Log::recvFromServer(std::string statusLine, std::string serverName) {
+  std::string msg = std::to_string(requestid) + ": Received " + statusLine +
+                    " from " + serverName;
+  save(msg);
+}
+
+void Log::respondClient(std::string statusText) {
+  std::string msg = std::to_string(requestid) + ": Responding " + statusText;
+  save(msg);
+}
+
+Log::Log() : requestid(-1) {}
+Log::Log(int id) : requestid(id) {}
+Log::~Log() {}

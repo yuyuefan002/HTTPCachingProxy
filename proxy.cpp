@@ -62,6 +62,7 @@ std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser) {
   std::string url = httparser.getURL();
   std::string hostname = httparser.getHostName();
   std::string port = httparser.getHostPort();
+  std::string statusLine = httparser.getStatusLine();
   Client client(hostname.c_str(),
                 port.c_str()); // have to check success or not, if failed,
                                // return 503,important
@@ -69,12 +70,34 @@ std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser) {
     return HTTP503();
   }
   client.Send(httparser.getRequest());
+  log.reqFromServer(statusLine, hostname);
   std::vector<char> HTTPResponse = client.recvServeResponse();
+  log.recvFromServer(statusLine, hostname);
   HTTPRSPNSParser httprspnsparser(HTTPResponse);
   if (httprspnsparser.getStatusCode() == 200 && httprspnsparser.good4Cache() &&
       httparser.good4Cache())
     cache.store(url, HTTPResponse);
   return HTTPResponse;
+}
+
+/*
+ * status: not tested
+ * get ip of client
+ */
+std::string getclientip(int newfd) {
+  sockaddr addr;
+  socklen_t addrlen;
+  char ip[INET_ADDRSTRLEN] = "";
+  try {
+    if (getpeername(newfd, &addr, &addrlen) == -1)
+      throw std::string("getpeername");
+    if (inet_ntop(AF_INET, &(((sockaddr_in *)&addr)->sin_addr), ip,
+                  INET_ADDRSTRLEN) == NULL)
+      throw std::string("inet_ntop");
+  } catch (std::string e) {
+    std::cerr << "Error: " << e << " failed" << std::endl;
+  }
+  return std::string(ip);
 }
 
 /*
@@ -89,17 +112,21 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
 
       HTTPResponse = handlebyCache(cache, httparser);
     }
-    if (HTTPResponse.empty())
+    if (HTTPResponse.empty()) {
       HTTPResponse = fetchNewResponse(cache, httparser);
+    }
     std::vector<char> pattern{'\r', '\n', '\r', '\n'};
     if (std::search(HTTPResponse.begin(), HTTPResponse.end(), pattern.begin(),
                     pattern.end()) == HTTPResponse.end()) {
       server.sendData(newfd, HTTP502());
+      log.respondClient(std::string(HTTP502().begin(), HTTP502().end()));
       return;
     }
   } catch (std::string e) {
     HTTPResponse = HTTP502();
   }
+  HTTPRSPNSParser httprspnsparser(HTTPResponse);
+  log.respondClient(httprspnsparser.getStatusText());
   server.sendData(newfd, HTTPResponse);
 }
 
@@ -110,6 +137,7 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
 void Proxy::POST_handler(HTTParser &httparser, int newfd) {
   std::string hostname = httparser.getHostName();
   std::string port = httparser.getHostPort();
+  std::string statusLine = httparser.getStatusLine();
   Client client(hostname.c_str(),
                 port.c_str()); // have to check success or not, if failed,
                                // return 503,important
@@ -118,7 +146,11 @@ void Proxy::POST_handler(HTTParser &httparser, int newfd) {
     return;
   }
   client.Send(httparser.getRequest());
+  log.reqFromServer(statusLine, hostname);
   std::vector<char> HTTPResponse = client.recvServeResponse();
+  log.recvFromServer(statusLine, hostname);
+  HTTPRSPNSParser httprspnsparser(HTTPResponse);
+  log.respondClient(httprspnsparser.getStatusText());
   server.sendData(newfd, HTTPResponse);
 }
 
@@ -178,11 +210,13 @@ void Proxy::CONNECT_handler(HTTParser &httparser, int newfd) {
   Client client(hostname.c_str(),
                 port.c_str()); // if fail, return 503,important
   if (client.getError() == 1) {
+    log.respondClient(std::string(HTTP503().begin(), HTTP503().end()));
     server.sendData(newfd, HTTP503());
     return;
   }
   // success
 
+  log.respondClient(std::string(HTTP200().begin(), HTTP200().end()));
   server.sendData(newfd, HTTP200());
   // transition message
   tunnelMode(newfd, server, client);
@@ -197,10 +231,17 @@ int Proxy::accNewRequest() {
     std::cerr << "Fail to accept a new request\n";
   return newfd;
 }
+/*
+<<<<<<< HEAD
+void Proxy::handler(int newfd, int requestid) {
+  std::vector<char> HTTPRequest = server.receiveData(newfd);
+=======*/
 void Proxy::handler(int newfd) {
   try {
     std::vector<char> HTTPRequest = server.receiveData(newfd);
     HTTParser httparser(HTTPRequest);
+    std::string ip = getclientip(newfd);
+    log.newRequest(httparser.getStatusLine(), ip);
     std::vector<char> pattern{'\r', '\n', '\r', '\n'};
     if (httparser.getMethod() != "POST" &&
         std::search(HTTPRequest.begin(), HTTPRequest.end(), pattern.begin(),
@@ -209,17 +250,20 @@ void Proxy::handler(int newfd) {
       return;
     }
     if (httparser.getMethod() == "GET")
+
       GET_handler(httparser, newfd);
 
-    else if (httparser.getMethod() == "CONNECT")
+    else if (httparser.getMethod() == "CONNECT") {
       CONNECT_handler(httparser, newfd);
+    }
 
-    else if (httparser.getMethod() == "POST")
+    else if (httparser.getMethod() == "POST") {
       POST_handler(httparser, newfd);
+    }
   } catch (std::string e) {
     std::cerr << e << std::endl;
   }
 }
-Proxy::Proxy() : server() {}
-Proxy::Proxy(const char *port) : server(port) {}
+Proxy::Proxy(int requestid) : server(), log(requestid) {}
+Proxy::Proxy(const char *port) : server(port), log() {}
 Proxy::~Proxy() {}

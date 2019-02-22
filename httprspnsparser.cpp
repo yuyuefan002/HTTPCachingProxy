@@ -183,6 +183,8 @@ std::string HTTPRSPNSParser::getETag() {
     return std::string();
   return headers["etag"];
 }
+
+std::string HTTPRSPNSParser::getStatusText() { return status_text; }
 /*
 int main() {
   HTTPRSPNSParser httprspnsparser(
