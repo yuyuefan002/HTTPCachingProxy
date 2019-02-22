@@ -7,6 +7,7 @@
 #include "log.h"
 #include "server.h"
 #include <iostream>
+typedef struct sockaddr sockaddr;
 class Proxy {
 private:
   Server server;
@@ -20,6 +21,6 @@ public:
   Proxy(const char *port);
   ~Proxy();
   int accNewRequest();
-  void handler(int newfd);
+  void handler(int newfd, int requestid);
 };
 #endif

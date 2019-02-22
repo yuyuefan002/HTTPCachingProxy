@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     int newfd = proxy.accNewRequest();
     int pid;
     if ((pid = fork() == 0)) {
-      proxy.handler(newfd);
+      proxy.handler(newfd, requestid);
       close(newfd);
       return EXIT_SUCCESS; // we could not use exit here, because resources
       // cannot be released gracefully.

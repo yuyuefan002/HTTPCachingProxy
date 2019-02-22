@@ -44,6 +44,26 @@ std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser) {
 }
 
 /*
+ * status: not tested
+ * get ip of client
+ */
+std::string getclientip(int newfd) {
+  sockaddr addr;
+  socklen_t addrlen;
+  char ip[INET_ADDRSTRLEN] = "";
+  try {
+    if (getpeername(newfd, &addr, &addrlen) == -1)
+      throw std::string("getpeername");
+    if (inet_ntop(AF_INET, &(((sockaddr_in *)&addr)->sin_addr), ip,
+                  INET_ADDRSTRLEN) == NULL)
+      throw std::string("inet_ntop");
+  } catch (std::string e) {
+    std::cerr << "Error: " << e << " failed" << std::endl;
+  }
+  return std::string(ip);
+}
+
+/*
  * status:complete
  * handle Method GET
  */
@@ -154,18 +174,24 @@ int Proxy::accNewRequest() {
     std::cerr << "Fail to accept a new request\n";
   return newfd;
 }
-void Proxy::handler(int newfd) {
+void Proxy::handler(int newfd, int requestid) {
   std::vector<char> HTTPRequest = server.receiveData(newfd);
   try {
     HTTParser httparser(HTTPRequest);
-    if (httparser.getMethod() == "GET")
+    Log log(requestid);
+    std::string ip = getclientip(newfd);
+    log.newRequest(httparser.getStatusLine(), ip);
+    if (httparser.getMethod() == "GET") {
       GET_handler(httparser, newfd);
+    }
 
-    else if (httparser.getMethod() == "CONNECT")
+    else if (httparser.getMethod() == "CONNECT") {
       CONNECT_handler(httparser, newfd);
+    }
 
-    else if (httparser.getMethod() == "POST")
+    else if (httparser.getMethod() == "POST") {
       POST_handler(httparser, newfd);
+    }
   } catch (std::string e) {
   }
 }
