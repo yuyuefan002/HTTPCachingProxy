@@ -19,11 +19,12 @@ private:
 public:
   void newRequest(std::string statusLine, std::string clientip);
   void checkCache();
-  void contactServer(std::string statusLine, std::string serverName);
-  void hereFromServer();
-  void respondClient();
+  void reqFromServer(std::string statusLine, std::string serverName);
+  void recvFromServer(std::string statusLine, std::string serverName);
+  void respondClient(std::string statusText);
   void closeTunnel();
 
+  Log();
   Log(int id);
   ~Log();
 };

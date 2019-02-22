@@ -4,9 +4,9 @@
 #define THREADNUM 100
 // to debug multi-thread
 // use"set follow-fork-mode-child"+main breakpoint
-void proxy_func(int newfd) {
+void proxy_func(int newfd, int requestid) {
   std::cout << "new thread\n";
-  Proxy proxy;
+  Proxy proxy(requestid);
   proxy.handler(newfd);
   close(newfd);
 }
@@ -34,21 +34,21 @@ int main(int argc, char **argv) {
   /*  int i = 0;
 =======
     }*/
-  /*std::thread threads[THREADNUM];
+  std::thread threads[THREADNUM];
   int i = 0;
->>>>>>> c8e852f60a364c1dcd9d2725bc0220e4193df367
+  int requestid = 0;
   Proxy proxy(argv[1]);
   while (1) {
     int newfd = proxy.accNewRequest();
-    threads[i++] = std::thread(proxy_func, newfd);
+    threads[i++] = std::thread(proxy_func, newfd, requestid++);
     if (i >= THREADNUM) {
       for (i = 0; i < THREADNUM; i++) {
         threads[i].join();
       }
       i = 0;
     }
-  }*/
-
+  }
+  /*
   Proxy proxy(argv[1]);
   while (1) {
     int newfd = proxy.accNewRequest();
@@ -61,5 +61,6 @@ int main(int argc, char **argv) {
     }
     close(newfd);
   }
+  */
   return EXIT_SUCCESS;
 }

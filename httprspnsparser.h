@@ -33,5 +33,6 @@ public:
   std::vector<char> getResponse();
   std::string getLastModified();
   std::string getETag();
+  std::string getStatusText();
 };
 #endif

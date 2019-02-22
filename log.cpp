@@ -18,7 +18,23 @@ void Log::newRequest(std::string statusLine, std::string clientip) {
 
 void Log::checkCache() {}
 
-void Log::contactServer(std::string statusLine, std::string serverName) {}
+void Log::reqFromServer(std::string statusLine, std::string serverName) {
+  std::string msg = std::to_string(requestid) + ": Requesting " + statusLine +
+                    " from " + serverName;
+  save(msg);
+}
 
+void Log::recvFromServer(std::string statusLine, std::string serverName) {
+  std::string msg = std::to_string(requestid) + ": Received " + statusLine +
+                    " from " + serverName;
+  save(msg);
+}
+
+void Log::respondClient(std::string statusText) {
+  std::string msg = std::to_string(requestid) + ": Responding " + statusText;
+  save(msg);
+}
+
+Log::Log() : requestid(-1) {}
 Log::Log(int id) : requestid(id) {}
 Log::~Log() {}
