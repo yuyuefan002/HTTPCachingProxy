@@ -78,15 +78,21 @@ std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser) {
 void Proxy::GET_handler(HTTParser &httparser, int newfd) {
   Cache cache;
   std::vector<char> HTTPResponse;
-  if (httparser.good4Cache())
-    HTTPResponse = handlebyCache(cache, httparser);
-  if (HTTPResponse.empty())
-    HTTPResponse = fetchNewResponse(cache, httparser);
-  std::vector<char> pattern{'\r', '\n', '\r', '\n'};
-  if (std::search(HTTPResponse.begin(), HTTPResponse.end(), pattern.begin(),
-                  pattern.end()) == HTTPResponse.end()) {
-    server.sendData(newfd, HTTP502());
-    return;
+  try {
+    if (httparser.good4Cache()) {
+
+      HTTPResponse = handlebyCache(cache, httparser);
+    }
+    if (HTTPResponse.empty())
+      HTTPResponse = fetchNewResponse(cache, httparser);
+    std::vector<char> pattern{'\r', '\n', '\r', '\n'};
+    if (std::search(HTTPResponse.begin(), HTTPResponse.end(), pattern.begin(),
+                    pattern.end()) == HTTPResponse.end()) {
+      server.sendData(newfd, HTTP502());
+      return;
+    }
+  } catch (std::string e) {
+    HTTPResponse = HTTP502();
   }
   server.sendData(newfd, HTTPResponse);
 }

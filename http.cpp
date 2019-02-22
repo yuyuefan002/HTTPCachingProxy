@@ -10,7 +10,7 @@ std::vector<char> HTTP400() {
   return HTTP400;
 }
 std::vector<char> HTTP502() {
-  std::string r = "HTTP/1.1 502 Bad Gatewat\r\n\r\n";
+  std::string r = "HTTP/1.1 502 Bad Gateway\r\n\r\n";
   std::vector<char> HTTP502(r.begin(), r.end());
   return HTTP502;
 }
