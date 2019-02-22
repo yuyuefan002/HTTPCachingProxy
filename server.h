@@ -5,6 +5,7 @@
 #include <cstring>
 #include <iostream>
 #include <netdb.h>
+#include <signal.h>
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -31,5 +32,6 @@ public:
   std::vector<char> receiveHTTPRequest(int fd);
   std::vector<char> receiveData(int fd);
   void sendData(int fd, const std::vector<char> &msg);
+  std::vector<char> basicRecv(int fd);
 };
 #endif

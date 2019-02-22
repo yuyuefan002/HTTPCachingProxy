@@ -151,12 +151,12 @@ void tunnelMode(const int &clientfd, Server &server, Client &client) {
       break;
     }
     if (FD_ISSET(serverfd, &read_fds)) {
-      std::vector<char> msg = client.recvServeResponse();
+      std::vector<char> msg = client.basicRecv();
       if (msg.empty())
         return;
       server.sendData(clientfd, msg);
     } else if (FD_ISSET(clientfd, &read_fds)) {
-      std::vector<char> msg = server.receiveData(clientfd);
+      std::vector<char> msg = server.basicRecv(clientfd);
       if (msg.empty())
         return;
       client.Send(msg);

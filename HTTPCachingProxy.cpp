@@ -9,6 +9,7 @@ void proxy_func(int newfd) {
   Proxy proxy;
   proxy.handler(newfd);
   close(newfd);
+  std::cout << "end\n";
 }
 int main(int argc, char **argv) {
   if (argc != 2) {
@@ -25,21 +26,19 @@ int main(int argc, char **argv) {
   if (pid > 0) {
     return EXIT_SUCCESS;
     }*/
-  /*std::thread threads[THREADNUM];
-  int i = 0;
+  //  std::thread threads[THREADNUM];
+  // int i = 0;
   Proxy proxy(argv[1]);
   while (1) {
-    int newfd = proxy.accNewRequest();
-    threads[i++] = std::thread(proxy_func, newfd);
-    if (i >= THREADNUM) {
-      for (i = 0; i < THREADNUM; i++) {
-        threads[i].join();
-      }
-      i = 0;
+    try {
+      int newfd = proxy.accNewRequest();
+      std::thread t = std::thread(proxy_func, newfd);
+      t.detach();
+    } catch (std::string e) {
     }
-  }*/
-
-  Proxy proxy(argv[1]);
+  }
+  std::cout << "main end\n";
+  /* Proxy proxy(argv[1]);
   while (1) {
     int newfd = proxy.accNewRequest();
     int pid;
@@ -50,6 +49,6 @@ int main(int argc, char **argv) {
       // cannot be released gracefully.
     }
     close(newfd);
-  }
+    }*/
   return EXIT_SUCCESS;
 }
