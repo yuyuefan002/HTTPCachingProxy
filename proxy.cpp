@@ -13,6 +13,10 @@ std::vector<char> getRevalidRequest(HTTPRSPNSParser &httprspnsparer,
   std::vector<char> request(msg.begin(), msg.end());
   return request;
 }
+/*
+ * revalidation
+ * status: untested
+ */
 bool revalidationSuccess(HTTPRSPNSParser &httprspnsparser,
                          HTTParser &httparser) {
   std::string hostname = httparser.getHostName();
