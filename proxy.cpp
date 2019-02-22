@@ -6,7 +6,10 @@ std::vector<char> getRevalidRequest(HTTPRSPNSParser &httprspnsparer,
   std::string msg = httparser.getStatusLine() + "\r\n";
 
   msg = msg + "If-Modified-Since: " + httprspnsparer.getLastModified() + "\r\n";
-  msg = msg + "If-None-Match: " + httprspnsparer.getETag() + "\r\n\r\n";
+  std::string tmp = httprspnsparer.getETag();
+  if (tmp.size() != 0)
+    msg = msg + "If-None-Match: " + tmp + "\r\n";
+  msg += "\r\n";
   std::vector<char> request(msg.begin(), msg.end());
   return request;
 }
