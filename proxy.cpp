@@ -85,14 +85,14 @@ std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser) {
  * get ip of client
  */
 std::string getclientip(int newfd) {
-  sockaddr addr;
-  socklen_t addrlen;
-  char ip[INET_ADDRSTRLEN] = "";
+  sockaddr_storage addr;
+  socklen_t len = sizeof addr;
+  char ip[INET_ADDRSTRLEN];
   try {
-    if (getpeername(newfd, &addr, &addrlen) == -1)
+    if (getpeername(newfd, (struct sockaddr *)&addr, &len) == -1)
       throw std::string("getpeername");
-    if (inet_ntop(AF_INET, &(((sockaddr_in *)&addr)->sin_addr), ip,
-                  INET_ADDRSTRLEN) == NULL)
+    sockaddr_in *s = (sockaddr_in *)&addr;
+    if (inet_ntop(AF_INET, &s->sin_addr, ip, sizeof ip) == NULL)
       throw std::string("inet_ntop");
   } catch (std::string e) {
     std::cerr << "Error: " << e << " failed" << std::endl;
@@ -215,7 +215,6 @@ void Proxy::CONNECT_handler(HTTParser &httparser, int newfd) {
     return;
   }
   // success
-
   log.respondClient(std::string(HTTP200().begin(), HTTP200().end()));
   server.sendData(newfd, HTTP200());
   // transition message
@@ -231,24 +230,27 @@ int Proxy::accNewRequest() {
     std::cerr << "Fail to accept a new request\n";
   return newfd;
 }
-/*
-<<<<<<< HEAD
-void Proxy::handler(int newfd, int requestid) {
-  std::vector<char> HTTPRequest = server.receiveData(newfd);
-=======*/
+
+bool request_is_imcomplete(HTTParser &httparser,
+                           std::vector<char> &HTTPRequest) {
+  std::vector<char> pattern{'\r', '\n', '\r', '\n'};
+  if (httparser.getMethod() != "POST" &&
+      std::search(HTTPRequest.begin(), HTTPRequest.end(), pattern.begin(),
+                  pattern.end()) == HTTPRequest.end()) {
+    return true;
+  }
+  return false;
+}
 void Proxy::handler(int newfd) {
   try {
     std::vector<char> HTTPRequest = server.receiveData(newfd);
     HTTParser httparser(HTTPRequest);
-    std::string ip = getclientip(newfd);
-    log.newRequest(httparser.getStatusLine(), ip);
-    std::vector<char> pattern{'\r', '\n', '\r', '\n'};
-    if (httparser.getMethod() != "POST" &&
-        std::search(HTTPRequest.begin(), HTTPRequest.end(), pattern.begin(),
-                    pattern.end()) == HTTPRequest.end()) {
+    if (request_is_imcomplete(httparser, HTTPRequest)) {
       server.sendData(newfd, HTTP400());
       return;
     }
+    // log.newRequest(httparser.getStatusLine(), getclientip(newfd));
+
     if (httparser.getMethod() == "GET")
 
       GET_handler(httparser, newfd);
