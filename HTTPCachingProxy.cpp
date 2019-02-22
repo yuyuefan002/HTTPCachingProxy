@@ -5,11 +5,9 @@
 // to debug multi-thread
 // use"set follow-fork-mode-child"+main breakpoint
 void proxy_func(int newfd) {
-  std::cout << "new thread\n";
   Proxy proxy;
   proxy.handler(newfd);
   close(newfd);
-  std::cout << "end\n";
 }
 int main(int argc, char **argv) {
   if (argc != 2) {
@@ -37,7 +35,6 @@ int main(int argc, char **argv) {
     } catch (std::string e) {
     }
   }
-  std::cout << "main end\n";
   /* Proxy proxy(argv[1]);
   while (1) {
     int newfd = proxy.accNewRequest();
