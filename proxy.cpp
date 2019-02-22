@@ -72,8 +72,10 @@ std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser) {
   client.Send(httparser.getRequest());
   log.reqFromServer(statusLine, hostname);
   std::vector<char> HTTPResponse = client.recvServeResponse();
-  log.recvFromServer(statusLine, hostname);
   HTTPRSPNSParser httprspnsparser(HTTPResponse);
+  std::vector<char> statusText = httprspnsparser.getStatusText();
+  log.recvFromServer(std::string(statusText.begin(), statusText.end()),
+                     hostname);
   if (httprspnsparser.getStatusCode() == 200 && httprspnsparser.good4Cache() &&
       httparser.good4Cache())
     cache.store(url, HTTPResponse);
@@ -119,7 +121,7 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
     if (std::search(HTTPResponse.begin(), HTTPResponse.end(), pattern.begin(),
                     pattern.end()) == HTTPResponse.end()) {
       server.sendData(newfd, HTTP502());
-      log.respondClient(std::string(HTTP502().begin(), HTTP502().end()));
+      log.respondClient(HTTP502());
       return;
     }
   } catch (std::string e) {
@@ -148,9 +150,11 @@ void Proxy::POST_handler(HTTParser &httparser, int newfd) {
   client.Send(httparser.getRequest());
   log.reqFromServer(statusLine, hostname);
   std::vector<char> HTTPResponse = client.recvServeResponse();
-  log.recvFromServer(statusLine, hostname);
   HTTPRSPNSParser httprspnsparser(HTTPResponse);
-  log.respondClient(httprspnsparser.getStatusText());
+  std::vector<char> statusText = httprspnsparser.getStatusText();
+  log.recvFromServer(std::string(statusText.begin(), statusText.end()),
+                     hostname);
+  log.respondClient(statusText);
   server.sendData(newfd, HTTPResponse);
 }
 
@@ -210,12 +214,12 @@ void Proxy::CONNECT_handler(HTTParser &httparser, int newfd) {
   Client client(hostname.c_str(),
                 port.c_str()); // if fail, return 503,important
   if (client.getError() == 1) {
-    log.respondClient(std::string(HTTP503().begin(), HTTP503().end()));
+    log.respondClient(HTTP503());
     server.sendData(newfd, HTTP503());
     return;
   }
   // success
-  log.respondClient(std::string(HTTP200().begin(), HTTP200().end()));
+  log.respondClient(HTTP200());
   server.sendData(newfd, HTTP200());
   // transition message
   tunnelMode(newfd, server, client);

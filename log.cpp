@@ -24,14 +24,15 @@ void Log::reqFromServer(std::string statusLine, std::string serverName) {
   save(msg);
 }
 
-void Log::recvFromServer(std::string statusLine, std::string serverName) {
-  std::string msg = std::to_string(requestid) + ": Received " + statusLine +
+void Log::recvFromServer(std::string statusText, std::string serverName) {
+  std::string msg = std::to_string(requestid) + ": Received " + statusText +
                     " from " + serverName;
   save(msg);
 }
 
-void Log::respondClient(std::string statusText) {
-  std::string msg = std::to_string(requestid) + ": Responding " + statusText;
+void Log::respondClient(std::vector<char> statusText) {
+  std::string msg = std::to_string(requestid) + ": Responding " +
+                    std::string(statusText.begin(), statusText.end());
   save(msg);
 }
 

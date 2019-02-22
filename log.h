@@ -8,6 +8,7 @@
 #include <string>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <vector>
 typedef struct sockaddr sockaddr;
 typedef struct sockaddr_in sockaddr_in;
 class Log {
@@ -20,8 +21,8 @@ public:
   void newRequest(std::string statusLine, std::string clientip);
   void checkCache();
   void reqFromServer(std::string statusLine, std::string serverName);
-  void recvFromServer(std::string statusLine, std::string serverName);
-  void respondClient(std::string statusText);
+  void recvFromServer(std::string statusText, std::string serverName);
+  void respondClient(std::vector<char> statusText);
   void closeTunnel();
 
   Log();

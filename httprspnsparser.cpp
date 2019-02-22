@@ -184,7 +184,9 @@ std::string HTTPRSPNSParser::getETag() {
   return headers["etag"];
 }
 
-std::string HTTPRSPNSParser::getStatusText() { return status_text; }
+const std::vector<char> HTTPRSPNSParser::getStatusText() const {
+  return std::vector<char>(status_text.begin(), status_text.end());
+}
 /*
 int main() {
   HTTPRSPNSParser httprspnsparser(
