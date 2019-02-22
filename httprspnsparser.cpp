@@ -159,7 +159,12 @@ bool HTTPRSPNSParser::good4Cache() {
 bool HTTPRSPNSParser::stillfresh() {
   size_t maxage = getMaxAge();
   size_t age = getAge();
-  return maxage >= age;
+  bool no_validate = true;
+  std::string ctlPolicy = headers["cache-control"];
+  if (ctlPolicy.find("must-revalidate") != std::string::npos) {
+    no_validate = false;
+  }
+  return maxage >= age && no_validate;
 }
 
 std::vector<char> HTTPRSPNSParser::getResponse() {
