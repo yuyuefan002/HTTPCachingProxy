@@ -19,14 +19,14 @@ private:
   int error;
   int sockfd;
   const char *getHost(const char *hostname);
-
+  std::vector<char> recvall(int fd);
   int sendall(int fd, const char *buf, size_t *len);
 
 public:
   Client(const char *h, const char *p);
   ~Client();
   std::vector<char> recvServeResponse();
-  std::vector<char> recvall(int fd);
+  std::vector<char> basicRecv();
   void Send(const std::vector<char> &msg);
   int getError();
   int getFD();

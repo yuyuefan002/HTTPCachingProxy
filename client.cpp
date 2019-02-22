@@ -7,6 +7,8 @@
  */
 const char *Client::getHost(const char *hostname) {
   struct hostent *he = gethostbyname(hostname);
+  if (he == nullptr)
+    throw std::string("no host");
   struct in_addr **addr_list = (struct in_addr **)he->h_addr_list;
   return inet_ntoa(*addr_list[0]);
 }
@@ -61,6 +63,13 @@ void Client::Send(const std::vector<char> &msg) {
  * Test Status: pass unit test, timeout=1, might be too long
  */
 std::vector<char> Client::recvall(int fd) {
+  // set recv timeout
+  timeval tv;
+  tv.tv_sec = 1;
+  tv.tv_usec = 0;
+  if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv, sizeof tv))
+    throw std::string("setsockopt");
+
   std::vector<char> msg;
   size_t index = 0;
   int nbytes;
@@ -78,6 +87,16 @@ std::vector<char> Client::recvall(int fd) {
       index += nbytes;
     }
   }
+  msg.resize(index);
+  return msg;
+}
+std::vector<char> Client::basicRecv() {
+  int index = 0;
+  std::vector<char> msg;
+  msg.resize(MAXDATASIZE);
+  index = recv(sockfd, &msg.data()[index], MAXDATASIZE - 1, 0);
+  if (index == -1)
+    throw std::string("recv failed");
   msg.resize(index);
   return msg;
 }
@@ -99,9 +118,6 @@ Client::Client(const char *h, const char *p) : port(p) {
   addrinfo host_info;
   addrinfo *host_info_list;
 
-  timeval tv;
-  tv.tv_sec = 1;
-  tv.tv_usec = 0;
   memset(&host_info, 0, sizeof(host_info));
   host_info.ai_family = AF_UNSPEC;
   host_info.ai_socktype = SOCK_STREAM;
@@ -113,11 +129,6 @@ Client::Client(const char *h, const char *p) : port(p) {
                     host_info_list->ai_protocol);
     if (sockfd == -1)
       throw std::string("socket");
-
-    // set recv timeout
-    if (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&tv,
-                   sizeof tv))
-      throw std::string("setsockopt");
 
     if ((connect(sockfd, host_info_list->ai_addr,
                  host_info_list->ai_addrlen)) == -1)

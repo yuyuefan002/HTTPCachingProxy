@@ -1,6 +1,7 @@
 #include "server.h"
 using namespace std;
 Server::Server(const char *p) : port(p) {
+  signal(SIGPIPE, SIG_IGN);
   const char *hostname = NULL;
   addrinfo *host_info_list;
 
@@ -75,7 +76,7 @@ std::vector<char> Server::recvall2(int fd) {
       msg.resize(index + MAXDATASIZE);
     nbytes = recv(fd, &msg.data()[index], MAXDATASIZE - 1, 0);
     if (nbytes == -1 && msg.empty()) {
-      std::cerr << "recv failed\n";
+      throw std::string("recv failed");
       break;
     } else if (nbytes <= 0) {
       break;
@@ -83,6 +84,16 @@ std::vector<char> Server::recvall2(int fd) {
       index += nbytes;
     }
   }
+  msg.resize(index);
+  return msg;
+}
+std::vector<char> Server::basicRecv(int fd) {
+  int index = 0;
+  std::vector<char> msg;
+  msg.resize(MAXDATASIZE);
+  index = recv(fd, &msg.data()[index], MAXDATASIZE - 1, 0);
+  if (index == -1)
+    throw std::string("recv failed");
   msg.resize(index);
   return msg;
 }
@@ -113,9 +124,15 @@ void Server::sendData(int fd, const std::vector<char> &msg) {
     sent = len - sent;
     len = sent;
     if (sendall(fd, &msg.data()[max - len], &sent) == -1) {
-      std::cerr << "send failed\n";
+      throw std::string("send failed");
     }
   }
 }
-Server::Server() {}
-Server::~Server() { close(listener); }
+Server::Server() {
+  signal(SIGPIPE, SIG_IGN);
+  listener = -1;
+}
+Server::~Server() {
+  if (listener != -1)
+    close(listener);
+}

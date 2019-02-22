@@ -180,7 +180,7 @@ std::string HTTPRSPNSParser::getLastModified() {
 
 std::string HTTPRSPNSParser::getETag() {
   if (headers.find("etag") == headers.end())
-    return "*";
+    return std::string();
   return headers["etag"];
 }
 

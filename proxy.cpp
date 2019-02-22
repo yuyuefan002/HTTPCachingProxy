@@ -6,7 +6,10 @@ std::vector<char> getRevalidRequest(HTTPRSPNSParser &httprspnsparer,
   std::string msg = httparser.getStatusLine() + "\r\n";
 
   msg = msg + "If-Modified-Since: " + httprspnsparer.getLastModified() + "\r\n";
-  msg = msg + "If-None-Match: " + httprspnsparer.getETag() + "\r\n\r\n";
+  std::string tmp = httprspnsparer.getETag();
+  if (tmp.size() != 0)
+    msg = msg + "If-None-Match: " + tmp + "\r\n";
+  msg += "\r\n";
   std::vector<char> request(msg.begin(), msg.end());
   return request;
 }
@@ -180,12 +183,12 @@ void tunnelMode(const int &clientfd, Server &server, Client &client) {
       break;
     }
     if (FD_ISSET(serverfd, &read_fds)) {
-      std::vector<char> msg = client.recvServeResponse();
+      std::vector<char> msg = client.basicRecv();
       if (msg.empty())
         return;
       server.sendData(clientfd, msg);
     } else if (FD_ISSET(clientfd, &read_fds)) {
-      std::vector<char> msg = server.receiveData(clientfd);
+      std::vector<char> msg = server.basicRecv(clientfd);
       if (msg.empty())
         return;
       client.Send(msg);
