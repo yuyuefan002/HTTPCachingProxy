@@ -23,6 +23,6 @@ public:
   Proxy(const char *port);
   ~Proxy();
   int accNewRequest();
-  void handler(int newfd, int requestid);
+  void handler(int newfd); //, int requestid);
 };
 #endif

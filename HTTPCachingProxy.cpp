@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     exit(EXIT_FAILURE);
   }
   // std::thread threads[THREADNUM];
-  /* daemon(0, 0);
+  daemon(0, 0);
   umask(0);
   pid_t pid = fork();
   if (pid < 0) {
@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
   }
   if (pid > 0) {
     return EXIT_SUCCESS;
-    }*/
+  }
   /*  int i = 0;
   Proxy proxy(argv[1]);
   while (1) {
@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
     int newfd = proxy.accNewRequest();
     int pid;
     if ((pid = fork() == 0)) {
-      proxy.handler(newfd, requestid);
+      proxy.handler(newfd); //, requestid);
       close(newfd);
       return EXIT_SUCCESS; // we could not use exit here, because resources
       // cannot be released gracefully.
