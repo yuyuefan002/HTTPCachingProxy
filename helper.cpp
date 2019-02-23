@@ -145,6 +145,23 @@ std::vector<char> Helper::deleteALine(std::vector<char> &msg,
   msg.erase(begin, end);
   return msg;
 }
+
+struct tm Helper::strtotm(std::string date) {
+  struct tm time;
+  time.tm_wday = wdayTable(fetchNextSeg(date, ','));
+  time.tm_mday = stoi(fetchNextSeg(date));
+  time.tm_mon = monTable(fetchNextSeg(date));
+  time.tm_year = stoi(fetchNextSeg(date)) - 1900;
+  time.tm_hour = stoi(fetchNextSeg(date, ':'));
+  time.tm_min = stoi(fetchNextSeg(date, ':'));
+  time.tm_sec = stoi(fetchNextSeg(date));
+  time.tm_isdst = 0;
+  std::string zone = fetchNextSeg(date);
+  time.tm_zone = zone.c_str();
+
+  return time;
+}
+
 /*
 int main() {
   Helper helper;

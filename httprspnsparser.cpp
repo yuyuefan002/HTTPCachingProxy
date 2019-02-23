@@ -155,17 +155,21 @@ bool HTTPRSPNSParser::good4Cache() {
   }
   return true;
 }
-// pass unit test
-bool HTTPRSPNSParser::stillfresh() {
+bool HTTPRSPNSParser::expires() {
   size_t maxage = getMaxAge();
   size_t age = getAge();
-  bool no_validate = true;
-  std::string ctlPolicy = headers["cache-control"];
-  if (ctlPolicy.find("must-revalidate") != std::string::npos) {
-    no_validate = false;
-  }
-  return maxage >= age && no_validate;
+  return maxage >= age;
 }
+
+bool HTTPRSPNSParser::mustRevalidate() {
+  std::string ctlPolicy = headers["cache-control"];
+  if (ctlPolicy.find("must-revalidate") != std::string::npos)
+    return false;
+  return true;
+}
+
+// pass unit test
+bool HTTPRSPNSParser::stillfresh() { return !expires() && !mustRevalidate(); }
 
 std::vector<char> HTTPRSPNSParser::getResponse() {
   updateAgeField();
@@ -184,9 +188,17 @@ std::string HTTPRSPNSParser::getETag() {
   return headers["etag"];
 }
 
-const std::vector<char> HTTPRSPNSParser::getStatusText() const {
+std::vector<char> HTTPRSPNSParser::getStatusText() {
   return std::vector<char>(status_text.begin(), status_text.end());
 }
+
+std::string HTTPRSPNSParser::expiresAt() {
+  struct tm born = helper.strtotm(headers["date"]);
+  struct tm expires = born;
+  expires.tm_sec += getMaxAge();
+  return std::to_string(mktime(&expires));
+}
+
 /*
 int main() {
   HTTPRSPNSParser httprspnsparser(
