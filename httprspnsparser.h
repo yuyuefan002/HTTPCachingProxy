@@ -24,14 +24,14 @@ private:
   size_t getMaxAge();
   void updateAgeField();
   size_t getAge();
+  bool mustRevalidate();
 
 public:
   HTTPRSPNSParser(std::vector<char> response);
   size_t getStatusCode();
   bool good4Cache();
-  bool mustRevalidate();
-  bool expires();
   bool stillfresh();
+  bool not_expire();
   std::vector<char> getResponse();
   std::string getLastModified();
   std::string getETag();

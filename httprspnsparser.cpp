@@ -155,7 +155,7 @@ bool HTTPRSPNSParser::good4Cache() {
   }
   return true;
 }
-bool HTTPRSPNSParser::expires() {
+bool HTTPRSPNSParser::not_expire() {
   size_t maxage = getMaxAge();
   size_t age = getAge();
   return maxage >= age;
@@ -164,12 +164,12 @@ bool HTTPRSPNSParser::expires() {
 bool HTTPRSPNSParser::mustRevalidate() {
   std::string ctlPolicy = headers["cache-control"];
   if (ctlPolicy.find("must-revalidate") != std::string::npos)
-    return false;
-  return true;
+    return true;
+  return false;
 }
 
 // pass unit test
-bool HTTPRSPNSParser::stillfresh() { return !expires() && !mustRevalidate(); }
+bool HTTPRSPNSParser::stillfresh() { return not_expire() && !mustRevalidate(); }
 
 std::vector<char> HTTPRSPNSParser::getResponse() {
   updateAgeField();

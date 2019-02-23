@@ -49,7 +49,7 @@ std::vector<char> Proxy::handlebyCache(Cache &cache, HTTParser &httparser) {
       std::cout << "expires at: " << httprspnsparser.expiresAt() << std::endl;
       return httprspnsparser.getResponse();
     } else {
-      if (httprspnsparser.expires())
+      if (httprspnsparser.not_expire() == false)
         log.checkCache(EXPIRED, httprspnsparser.expiresAt());
       log.checkCache(NEEDVALIDATE, "");
       if (revalidationSuccess(httprspnsparser, httparser))
