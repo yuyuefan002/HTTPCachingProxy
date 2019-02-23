@@ -8,6 +8,10 @@
 #include "log.h"
 #include "server.h"
 #include <iostream>
+#define NOTINCACHE 1
+#define EXPIRED 2
+#define NEEDVALIDATE 3
+#define VALID 4
 typedef struct sockaddr sockaddr;
 class Proxy {
 private:

@@ -29,10 +29,13 @@ public:
   HTTPRSPNSParser(std::vector<char> response);
   size_t getStatusCode();
   bool good4Cache();
+  bool mustRevalidate();
+  bool expires();
   bool stillfresh();
   std::vector<char> getResponse();
   std::string getLastModified();
   std::string getETag();
-  const std::vector<char> getStatusText() const;
+  std::vector<char> getStatusText();
+  std::string expiresAt();
 };
 #endif

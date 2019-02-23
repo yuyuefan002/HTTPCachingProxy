@@ -45,12 +45,18 @@ std::vector<char> Proxy::handlebyCache(Cache &cache, HTTParser &httparser) {
     std::vector<char> HTTPResponse = cache.read(url);
     HTTPRSPNSParser httprspnsparser(HTTPResponse);
     if (httprspnsparser.stillfresh()) {
+      log.checkCache(VALID, "");
+      std::cout << "expires at: " << httprspnsparser.expiresAt() << std::endl;
       return httprspnsparser.getResponse();
     } else {
+      if (httprspnsparser.expires())
+        log.checkCache(EXPIRED, httprspnsparser.expiresAt());
+      log.checkCache(NEEDVALIDATE, "");
       if (revalidationSuccess(httprspnsparser, httparser))
         return HTTPResponse;
     }
   }
+  log.checkCache(NOTINCACHE, "");
   return std::vector<char>();
 }
 
@@ -73,9 +79,7 @@ std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser) {
   log.reqFromServer(statusLine, hostname);
   std::vector<char> HTTPResponse = client.recvServeResponse();
   HTTPRSPNSParser httprspnsparser(HTTPResponse);
-  std::vector<char> statusText = httprspnsparser.getStatusText();
-  log.recvFromServer(std::string(statusText.begin(), statusText.end()),
-                     hostname);
+  log.recvFromServer(httprspnsparser.getStatusText(), hostname);
   if (httprspnsparser.getStatusCode() == 200 && httprspnsparser.good4Cache() &&
       httparser.good4Cache())
     cache.store(url, HTTPResponse);
@@ -83,7 +87,7 @@ std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser) {
 }
 
 /*
- * status: not tested
+ * status: complete
  * get ip of client
  */
 std::string getclientip(int newfd) {
@@ -111,7 +115,7 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
   std::vector<char> HTTPResponse;
   try {
     if (httparser.good4Cache()) {
-
+      std::cout << "check if in cache" << std::endl;
       HTTPResponse = handlebyCache(cache, httparser);
     }
     if (HTTPResponse.empty()) {
@@ -129,6 +133,7 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
   }
   HTTPRSPNSParser httprspnsparser(HTTPResponse);
   log.respondClient(httprspnsparser.getStatusText());
+  std::cout << "status code: " << httprspnsparser.getStatusCode() << std::endl;
   server.sendData(newfd, HTTPResponse);
 }
 
@@ -151,10 +156,9 @@ void Proxy::POST_handler(HTTParser &httparser, int newfd) {
   log.reqFromServer(statusLine, hostname);
   std::vector<char> HTTPResponse = client.recvServeResponse();
   HTTPRSPNSParser httprspnsparser(HTTPResponse);
-  std::vector<char> statusText = httprspnsparser.getStatusText();
-  log.recvFromServer(std::string(statusText.begin(), statusText.end()),
-                     hostname);
-  log.respondClient(statusText);
+
+  log.recvFromServer(httprspnsparser.getStatusText(), hostname);
+  log.respondClient(httprspnsparser.getStatusText());
   server.sendData(newfd, HTTPResponse);
 }
 
@@ -253,19 +257,15 @@ void Proxy::handler(int newfd) {
       server.sendData(newfd, HTTP400());
       return;
     }
-    // log.newRequest(httparser.getStatusLine(), getclientip(newfd));
-
+    std::cout << "client ip: " << getclientip(newfd) << std::endl;
+    log.newRequest(httparser.getStatusLine(), getclientip(newfd));
     if (httparser.getMethod() == "GET")
-
       GET_handler(httparser, newfd);
-
-    else if (httparser.getMethod() == "CONNECT") {
+    else if (httparser.getMethod() == "CONNECT")
       CONNECT_handler(httparser, newfd);
-    }
-
-    else if (httparser.getMethod() == "POST") {
+    else if (httparser.getMethod() == "POST")
       POST_handler(httparser, newfd);
-    }
+
   } catch (std::string e) {
     std::cerr << e << std::endl;
   }

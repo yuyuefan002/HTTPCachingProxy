@@ -16,7 +16,21 @@ void Log::newRequest(std::string statusLine, std::string clientip) {
   save(msg);
 }
 
-void Log::checkCache() {}
+void Log::checkCache(int status, std::string expiredTime) {
+  std::string msg = std::to_string(requestid) + ": ";
+  if (status == NOTINCACHE) {
+    msg += "not in cache";
+  } else if (status == EXPIRED) {
+    msg += "in cache, but expired at " + expiredTime;
+  } else if (status == NEEDVALIDATE) {
+    msg += "in cache, requires validation";
+  } else if (status == VALID) {
+    msg += "in cache, valid";
+  } else {
+    msg += "fail to check cache status";
+  }
+  save(msg);
+}
 
 void Log::reqFromServer(std::string statusLine, std::string serverName) {
   std::string msg = std::to_string(requestid) + ": Requesting " + statusLine +
@@ -24,8 +38,9 @@ void Log::reqFromServer(std::string statusLine, std::string serverName) {
   save(msg);
 }
 
-void Log::recvFromServer(std::string statusText, std::string serverName) {
-  std::string msg = std::to_string(requestid) + ": Received " + statusText +
+void Log::recvFromServer(std::vector<char> statusText, std::string serverName) {
+  std::string msg = std::to_string(requestid) + ": Received " +
+                    std::string(statusText.begin(), statusText.end()) +
                     " from " + serverName;
   save(msg);
 }

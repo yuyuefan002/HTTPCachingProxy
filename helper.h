@@ -17,5 +17,6 @@ public:
   std::vector<char> deleteALine(std::vector<char> &msg,
                                 std::vector<char>::iterator begin);
   size_t HTTPAge(std::string date);
+  struct tm strtotm(std::string date);
 };
 #endif
