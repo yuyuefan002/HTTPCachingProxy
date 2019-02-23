@@ -158,7 +158,6 @@ struct tm Helper::strtotm(std::string date) {
   time.tm_isdst = 0;
   std::string zone = fetchNextSeg(date);
   time.tm_zone = zone.c_str();
-
   return time;
 }
 
