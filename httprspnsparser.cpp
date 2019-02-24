@@ -155,6 +155,18 @@ bool HTTPRSPNSParser::good4Cache() {
   }
   return true;
 }
+
+std::string HTTPRSPNSParser::whyBad4Cache() {
+  std::string ctlPolicy = headers["cache-control"];
+  if (ctlPolicy.find("private") != std::string::npos)
+    return "private policy of http response";
+  if (ctlPolicy.find("no-cache") != std::string::npos)
+    return "no-cache policy of http response";
+  if (ctlPolicy.find("no-store") != std::string::npos)
+    return "no-store policy of http response";
+  return "max cache time is 0";
+}
+
 bool HTTPRSPNSParser::not_expire() {
   size_t maxage = getMaxAge();
   size_t age = getAge();
@@ -196,7 +208,9 @@ std::string HTTPRSPNSParser::expiresAt() {
   struct tm born = helper.strtotm(headers["date"]);
   struct tm expires = born;
   expires.tm_sec += getMaxAge();
-  return std::to_string(mktime(&expires));
+  time_t t = mktime(&expires);
+  char *time = ctime(&t);
+  return std::string(time);
 }
 
 /*

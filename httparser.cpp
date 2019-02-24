@@ -165,6 +165,18 @@ std::string HTTParser::getMethod() { return method; }
 std::string HTTParser::getURL() { return path; } // valgrind clean
 
 std::string HTTParser::getStatusLine() { return statusline; }
+
+std::string HTTParser::whyBad4Cache() {
+  std::string ctlPolicy = headers["cache-control"];
+  if (ctlPolicy.find("private") != std::string::npos)
+    return "private policy of http response";
+  if (ctlPolicy.find("no-cache") != std::string::npos)
+    return "no-cache policy of http response";
+  if (ctlPolicy.find("no-store") != std::string::npos)
+    return "no-store policy of http response";
+  return "max cache age is 0";
+}
+
 /*
 int main() {
   std::string HTTPRequest =

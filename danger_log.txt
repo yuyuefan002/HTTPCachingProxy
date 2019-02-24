@@ -22,3 +22,7 @@ warning: pass unit test only means it behaves right when using it right.
 2/20
 1.parser could go wrong, string cannot equal null. should use exception to handle these situation
 2.very hard to debug why connect failed,now I know all my function is correct.
+
+2/24
+1.in tunnel mode, need request id to log.
+2.reasons of not cacheable is not necessarily "private", "no-cache", or "no-store". could also be max-age is 0.

@@ -12,7 +12,7 @@ void Log::newRequest(std::string statusLine, std::string clientip) {
   time_t t = std::chrono::system_clock::to_time_t(now);
   char *time = ctime(&t);
   std::string msg = std::to_string(requestid) + ": " + statusLine + " from " +
-                    clientip + std::string(time);
+                    clientip + " @ " + std::string(time);
   save(msg);
 }
 
@@ -48,6 +48,27 @@ void Log::recvFromServer(std::vector<char> statusText, std::string serverName) {
 void Log::respondClient(std::vector<char> statusText) {
   std::string msg = std::to_string(requestid) + ": Responding " +
                     std::string(statusText.begin(), statusText.end());
+  save(msg);
+}
+
+void Log::notCacheable(std::string reason) {
+  std::string msg =
+      std::to_string(requestid) + ": not cacheable because " + reason;
+  save(msg);
+}
+void Log::cached(std::string expireDate) {
+  std::string msg =
+      std::to_string(requestid) + ": cached, expires at " + expireDate;
+  save(msg);
+}
+void Log::cachedNeedRevalid() {
+  std::string msg =
+      std::to_string(requestid) + ": cached, but requires revalidation";
+  save(msg);
+}
+
+void Log::closeTunnel() {
+  std::string msg = std::to_string(requestid) + ": Tunnel closed";
   save(msg);
 }
 

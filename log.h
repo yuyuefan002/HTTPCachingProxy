@@ -27,6 +27,9 @@ public:
   void reqFromServer(std::string statusLine, std::string serverName);
   void recvFromServer(std::vector<char> statusText, std::string serverName);
   void respondClient(std::vector<char> statusText);
+  void notCacheable(std::string reason);
+  void cached(std::string expireDate);
+  void cachedNeedRevalid();
   void closeTunnel();
 
   Log();

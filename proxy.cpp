@@ -81,8 +81,18 @@ std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser) {
   HTTPRSPNSParser httprspnsparser(HTTPResponse);
   log.recvFromServer(httprspnsparser.getStatusText(), hostname);
   if (httprspnsparser.getStatusCode() == 200 && httprspnsparser.good4Cache() &&
-      httparser.good4Cache())
+      httparser.good4Cache()) {
     cache.store(url, HTTPResponse);
+    if (httprspnsparser.mustRevalidate())
+      log.cachedNeedRevalid();
+    else
+      log.cached(httprspnsparser.expiresAt());
+  } else {
+    if (!httprspnsparser.good4Cache())
+      log.notCacheable(httprspnsparser.whyBad4Cache());
+    else if (!httparser.good4Cache())
+      log.notCacheable(httparser.whyBad4Cache());
+  }
   return HTTPResponse;
 }
 
@@ -183,7 +193,7 @@ void preparetunnel(fd_set *master, int &fdmax, const int &clientfd,
  *
  *
  */
-void tunnelMode(const int &clientfd, Server &server, Client &client) {
+void tunnelMode(const int &clientfd, Log &log, Server &server, Client &client) {
   // Build connection
   fd_set master, read_fds;
   int fdmax, serverfd = client.getFD();
@@ -196,13 +206,17 @@ void tunnelMode(const int &clientfd, Server &server, Client &client) {
     }
     if (FD_ISSET(serverfd, &read_fds)) {
       std::vector<char> msg = client.basicRecv();
-      if (msg.empty())
+      if (msg.empty()) {
+        log.closeTunnel();
         return;
+      }
       server.sendData(clientfd, msg);
     } else if (FD_ISSET(clientfd, &read_fds)) {
       std::vector<char> msg = server.basicRecv(clientfd);
-      if (msg.empty())
+      if (msg.empty()) {
+        log.closeTunnel();
         return;
+      }
       client.Send(msg);
     }
   }
@@ -226,7 +240,7 @@ void Proxy::CONNECT_handler(HTTParser &httparser, int newfd) {
   log.respondClient(HTTP200());
   server.sendData(newfd, HTTP200());
   // transition message
-  tunnelMode(newfd, server, client);
+  tunnelMode(newfd, log, server, client);
 }
 
 /*

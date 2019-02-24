@@ -17,8 +17,13 @@ int main(int argc, char **argv) {
     std::cerr << "Usage: HTTPCachingProxy <port>\n";
     exit(EXIT_FAILURE);
   }
-  // daemon(0, 0);
-
+  daemon(0, 0);
+  umask(0);
+  pid_t pid = fork();
+  if (pid < 0)
+    std::cerr << "fail to fork" << std::endl;
+  if (pid > 0)
+    return EXIT_SUCCESS;
   std::thread threads[THREADNUM];
   int requestid = 0;
   Proxy proxy(argv[1]);

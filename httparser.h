@@ -36,6 +36,7 @@ public:
   std::string getMethod();
   std::string getURL();
   std::string getStatusLine();
+  std::string whyBad4Cache();
   bool good4Cache();
 };
 #endif
