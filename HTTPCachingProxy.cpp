@@ -1,9 +1,20 @@
 #include "proxy.h"
 #include <iostream>
 #include <thread>
-#define THREADNUM 100
 // to debug multi-thread
 // use"set follow-fork-mode-child"+main breakpoint
+void createIndex(std::string path) {
+  std::string dir;
+  Helper helper;
+  while (!path.empty()) {
+    dir += helper.fetchNextSeg(path, '/');
+    if (!path.empty()) {
+      mkdir(dir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+      dir += "/";
+    }
+  }
+}
+
 void proxy_func(std::pair<int, int> *args) {
   std::cout << "new thread\n";
   int newfd = args->first;
@@ -17,6 +28,10 @@ int main(int argc, char **argv) {
     std::cerr << "Usage: HTTPCachingProxy <port>\n";
     exit(EXIT_FAILURE);
   }
+  int requestid = 0;
+  Proxy proxy(argv[1]);
+  createIndex(PATH);
+  // become a daemon
   daemon(0, 0);
   umask(0);
   pid_t pid = fork();
@@ -24,9 +39,7 @@ int main(int argc, char **argv) {
     std::cerr << "fail to fork" << std::endl;
   if (pid > 0)
     return EXIT_SUCCESS;
-  std::thread threads[THREADNUM];
-  int requestid = 0;
-  Proxy proxy(argv[1]);
+
   while (1) {
     int newfd = proxy.accNewRequest();
     std::pair<int, int> *args = new std::pair<int, int>(newfd, requestid++);
@@ -34,16 +47,5 @@ int main(int argc, char **argv) {
     t.detach();
     // proxy_func(args);
   }
-  /* Proxy proxy(argv[1]);
-  while (1) {
-    int newfd = proxy.accNewRequest();
-    int pid;
-    if ((pid = fork() == 0)) {
-      proxy.handler(newfd); //, requestid);
-      close(newfd);
-      return EXIT_SUCCESS; // we could not use exit here, because resources
-      // cannot be released gracefully.
-    }
-    close(newfd);*/
   return EXIT_SUCCESS;
 }

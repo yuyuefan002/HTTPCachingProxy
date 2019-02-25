@@ -1,5 +1,6 @@
 #ifndef __LOG_H__
 #define __LOG_H__
+#include "helper.h"
 #include <arpa/inet.h>
 #include <chrono>
 #include <ctime>
@@ -7,12 +8,14 @@
 #include <iostream>
 #include <string>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <vector>
 #define NOTINCACHE 1
 #define EXPIRED 2
 #define NEEDVALIDATE 3
 #define VALID 4
+#define PATH "/var/log/erss"
 typedef struct sockaddr sockaddr;
 typedef struct sockaddr_in sockaddr_in;
 class Log {

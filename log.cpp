@@ -3,7 +3,7 @@
 void Log::save(std::string msg) {
   std::ofstream outfile;
   outfile.open("/var/log/erss/proxy.log", std::ios::out | std::ios::app);
-  outfile << msg << std::endl;
+  outfile << msg;
   outfile.close();
 }
 
@@ -63,12 +63,12 @@ void Log::cached(std::string expireDate) {
 }
 void Log::cachedNeedRevalid() {
   std::string msg =
-      std::to_string(requestid) + ": cached, but requires revalidation";
+      std::to_string(requestid) + ": cached, but requires revalidation\n";
   save(msg);
 }
 
 void Log::closeTunnel() {
-  std::string msg = std::to_string(requestid) + ": Tunnel closed";
+  std::string msg = std::to_string(requestid) + ": Tunnel closed\n";
   save(msg);
 }
 
