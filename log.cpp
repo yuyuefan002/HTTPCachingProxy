@@ -19,15 +19,15 @@ void Log::newRequest(std::string statusLine, std::string clientip) {
 void Log::checkCache(int status, std::string expiredTime) {
   std::string msg = std::to_string(requestid) + ": ";
   if (status == NOTINCACHE) {
-    msg += "not in cache";
+    msg += "not in cache\n";
   } else if (status == EXPIRED) {
     msg += "in cache, but expired at " + expiredTime;
   } else if (status == NEEDVALIDATE) {
-    msg += "in cache, requires validation";
+    msg += "in cache, requires validation\n";
   } else if (status == VALID) {
-    msg += "in cache, valid";
+    msg += "in cache, valid\n";
   } else {
-    msg += "fail to check cache status";
+    msg += "fail to check cache status\n";
   }
   save(msg);
 }
@@ -46,6 +46,8 @@ void Log::recvFromServer(std::vector<char> statusText, std::string serverName) {
 }
 
 void Log::respondClient(std::vector<char> statusText) {
+  if (statusText.empty())
+    return;
   std::string msg = std::to_string(requestid) + ": Responding " +
                     std::string(statusText.begin(), statusText.end());
   save(msg);

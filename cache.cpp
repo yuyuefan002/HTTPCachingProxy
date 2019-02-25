@@ -36,7 +36,7 @@ std::string Cache::parseURL(std::string url) {
 }
 // pass unit test
 Cache::Cache() {
-  cachename = "proxycache";
+  cachename = "/var/cache/proxycache";
   mkdir(cachename.c_str(),
         S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH); // ignore fail here
 }

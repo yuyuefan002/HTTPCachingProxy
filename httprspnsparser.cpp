@@ -170,7 +170,7 @@ std::string HTTPRSPNSParser::whyBad4Cache() {
 bool HTTPRSPNSParser::not_expire() {
   size_t maxage = getMaxAge();
   size_t age = getAge();
-  return maxage < age;
+  return maxage > age;
 }
 
 bool HTTPRSPNSParser::mustRevalidate() {
