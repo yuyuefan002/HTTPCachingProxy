@@ -143,7 +143,6 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
   }
   HTTPRSPNSParser httprspnsparser(HTTPResponse);
   log.respondClient(httprspnsparser.getStatusText());
-  std::cout << "status code: " << httprspnsparser.getStatusCode() << std::endl;
   server.sendData(newfd, HTTPResponse);
 }
 

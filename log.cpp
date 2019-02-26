@@ -48,6 +48,12 @@ void Log::recvFromServer(std::vector<char> statusText, std::string serverName) {
 void Log::respondClient(std::vector<char> statusText) {
   if (statusText.empty())
     return;
+  std::vector<char> pattern{'\r', '\n', '\r', '\n'};
+  auto it = std::search(statusText.begin(), statusText.end(), pattern.begin(),
+                        pattern.end());
+  if (it != statusText.end()) {
+    statusText.erase(it, it + 1);
+  }
   std::string msg = std::to_string(requestid) + ": Responding " +
                     std::string(statusText.begin(), statusText.end());
   save(msg);
