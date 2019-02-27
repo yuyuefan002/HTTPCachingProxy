@@ -39,7 +39,6 @@ int main(int argc, char **argv) {
     std::cerr << "fail to fork" << std::endl;
   if (pid > 0)
     return EXIT_SUCCESS;
-
   while (1) {
     int newfd = proxy.accNewRequest();
     std::pair<int, int> *args = new std::pair<int, int>(newfd, requestid++);

@@ -175,7 +175,9 @@ bool HTTPRSPNSParser::not_expire() {
 
 bool HTTPRSPNSParser::mustRevalidate() {
   std::string ctlPolicy = headers["cache-control"];
-  if (ctlPolicy.find("must-revalidate") != std::string::npos)
+  if (ctlPolicy.find("must-revalidation") != std::string::npos)
+    return true;
+  if (ctlPolicy.find("proxy-revalidation") != std::string::npos)
     return true;
   return false;
 }

@@ -63,6 +63,15 @@ bool HTTParser::good4Cache() {
   }
   return true;
 }
+
+bool HTTParser::mustRevalidate() {
+  std::string ctlPolicy = headers["cache-control"];
+  if (ctlPolicy.find("must-revalidation") != std::string::npos)
+    return true;
+  if (ctlPolicy.find("proxy-revalidation") != std::string::npos)
+    return true;
+  return false;
+}
 /*
  * status: incomplete
  * Errnum Mapping Table

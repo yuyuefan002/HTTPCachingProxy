@@ -34,14 +34,14 @@ void Log::checkCache(int status, std::string expiredTime) {
 
 void Log::reqFromServer(std::string statusLine, std::string serverName) {
   std::string msg = std::to_string(requestid) + ": Requesting " + statusLine +
-                    " from " + serverName;
+                    " from " + serverName + "\n";
   save(msg);
 }
 
 void Log::recvFromServer(std::vector<char> statusText, std::string serverName) {
   std::string msg = std::to_string(requestid) + ": Received " +
                     std::string(statusText.begin(), statusText.end()) +
-                    " from " + serverName;
+                    " from " + serverName + "\n";
   save(msg);
 }
 
@@ -55,13 +55,13 @@ void Log::respondClient(std::vector<char> statusText) {
     statusText.erase(it, it + 1);
   }
   std::string msg = std::to_string(requestid) + ": Responding " +
-                    std::string(statusText.begin(), statusText.end());
+                    std::string(statusText.begin(), statusText.end()) + "\n";
   save(msg);
 }
 
 void Log::notCacheable(std::string reason) {
   std::string msg =
-      std::to_string(requestid) + ": not cacheable because " + reason;
+      std::to_string(requestid) + ": not cacheable because " + reason + "\n";
   save(msg);
 }
 void Log::cached(std::string expireDate) {
