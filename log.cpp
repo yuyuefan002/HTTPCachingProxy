@@ -52,7 +52,7 @@ void Log::respondClient(std::vector<char> statusText) {
   auto it = std::search(statusText.begin(), statusText.end(), pattern.begin(),
                         pattern.end());
   if (it != statusText.end()) {
-    statusText.erase(it, it + 1);
+    statusText.erase(it, it + 4);
   }
   std::string msg = std::to_string(requestid) + ": Responding " +
                     std::string(statusText.begin(), statusText.end()) + "\n";
