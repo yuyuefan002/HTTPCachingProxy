@@ -107,6 +107,7 @@ std ::string HTTParser::updateHTTPRequest(std::string request) {
     request.replace(target, 1 + port.size(), "");
   end = request.find("\r\n");
   path = request.substr(0, end);
+  statusline = request.substr(0, end);
   path = updateHTTPath(path);
   return request;
 }
