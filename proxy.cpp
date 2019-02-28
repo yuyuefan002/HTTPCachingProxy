@@ -4,7 +4,7 @@ std::vector<char> getRevalidRequest(HTTPRSPNSParser &httprspnsparer,
                                     HTTParser &httparser) {
 
   std::string msg = httparser.getStatusLine() + "\r\n";
-
+  msg = msg + "Host: " + httparser.getHostName() + "\r\n";
   msg = msg + "If-Modified-Since: " + httprspnsparer.getLastModified() + "\r\n";
   std::string tmp = httprspnsparer.getETag();
   if (tmp.size() != 0)
@@ -18,7 +18,8 @@ std::vector<char> getRevalidRequest(HTTPRSPNSParser &httprspnsparer,
  * status: untested
  */
 std::vector<char> revalidation(HTTPRSPNSParser &httprspnsparser,
-                               HTTParser &httparser) {
+                               HTTParser &httparser, Cache &cache,
+                               std::string &url) {
   std::string hostname = httparser.getHostName();
   std::string port = httparser.getHostPort();
   Client client(hostname.c_str(),
@@ -31,6 +32,7 @@ std::vector<char> revalidation(HTTPRSPNSParser &httprspnsparser,
   HTTPRSPNSParser validate(HTTPResponse);
   if (validate.getStatusCode() == 304)
     return httprspnsparser.getResponse();
+  cache.store(url, HTTPResponse);
   return validate.getResponse();
 }
 
@@ -39,28 +41,7 @@ std::vector<char> revalidation(HTTPRSPNSParser &httprspnsparser,
  * use response in cache
  *
  */
-/*std::vector<char> Proxy::handlebyCache(Cache &cache, HTTParser &httparser) {
-  std::string url = httparser.getURL();
-  if (cache.check(url)) {
-    std::vector<char> HTTPResponse = cache.read(url);
-    HTTPRSPNSParser httprspnsparser(HTTPResponse);
-    if (httprspnsparser.stillfresh()) {
-      if (httparser.mustRevalidate() || !httparser.good4Cache())
-        log.checkCache(NEEDVALIDATE, "");
-      log.checkCache(VALID, "");
-      std::cout << "expires at: " << httprspnsparser.expiresAt() << std::endl;
-      return httprspnsparser.getResponse();
-    } else {
-      if (httprspnsparser.not_expire() == false)
-        log.checkCache(EXPIRED, httprspnsparser.expiresAt());
-      log.checkCache(NEEDVALIDATE, "");
-      if (revalidationSuccess(httprspnsparser, httparser))
-        return HTTPResponse;
-    }
-  }
-  log.checkCache(NOTINCACHE, "");
-  return std::vector<char>();
-}*/
+
 std::vector<char> Proxy::handlebyCache(Cache &cache, HTTParser &httparser) {
   std::string url = httparser.getURL();
   if (!cache.check(url)) {
@@ -82,7 +63,7 @@ std::vector<char> Proxy::handlebyCache(Cache &cache, HTTParser &httparser) {
     needRevalid = true;
   }
   if (needRevalid)
-    return revalidation(httprspnsparser, httparser);
+    return revalidation(httprspnsparser, httparser, cache, url);
   // valid
   log.checkCache(VALID, "");
   return httprspnsparser.getResponse();
@@ -294,7 +275,6 @@ void Proxy::handler(int newfd) {
       server.sendData(newfd, HTTP400());
       return;
     }
-    std::cout << "client ip: " << getclientip(newfd) << std::endl;
     log.newRequest(httparser.getStatusLine(), getclientip(newfd));
     if (httparser.getMethod() == "GET")
       GET_handler(httparser, newfd);

@@ -16,7 +16,6 @@ void createIndex(std::string path) {
 }
 
 void proxy_func(std::pair<int, int> *args) {
-  std::cout << "new thread\n";
   int newfd = args->first;
   int requestid = args->second;
   Proxy proxy(requestid);
@@ -37,14 +36,12 @@ int main(int argc, char **argv) {
   pid_t pid = fork();
   if (pid < 0)
     std::cerr << "fail to fork" << std::endl;
-  if (pid > 0)
-    return EXIT_SUCCESS;
   while (1) {
     int newfd = proxy.accNewRequest();
     std::pair<int, int> *args = new std::pair<int, int>(newfd, requestid++);
-    std::thread t = std::thread(proxy_func, args);
-    t.detach();
-    // proxy_func(args);
+    // std::thread t = std::thread(proxy_func, args);
+    // t.detach();
+    proxy_func(args);
   }
   return EXIT_SUCCESS;
 }
