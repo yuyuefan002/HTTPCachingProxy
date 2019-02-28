@@ -135,8 +135,11 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
   } catch (std::string e) {
     HTTPResponse = HTTP502();
   }
-  HTTPRSPNSParser httprspnsparser(HTTPResponse);
-  log.respondClient(httprspnsparser.getStatusText());
+  if (HTTPResponse.size() != 0) {
+    HTTPRSPNSParser httprspnsparser(HTTPResponse);
+    log.respondClient(httprspnsparser.getStatusText());
+  } else
+    HTTPResponse = HTTP502();
   server.sendData(newfd, HTTPResponse);
 }
 

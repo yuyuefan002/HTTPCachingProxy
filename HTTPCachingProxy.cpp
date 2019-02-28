@@ -23,12 +23,12 @@ void proxy_func(std::pair<int, int> *args) {
   close(newfd);
 }
 int main(int argc, char **argv) {
-  /*if (argc != 2) {
+  if (argc != 2) {
     std::cerr << "Usage: HTTPCachingProxy <port>\n";
     exit(EXIT_FAILURE);
-    }*/
+  }
   int requestid = 0;
-  Proxy proxy("12345");
+  Proxy proxy(argv[1]);
   createIndex(PATH);
   // become a daemon
   daemon(0, 0);
