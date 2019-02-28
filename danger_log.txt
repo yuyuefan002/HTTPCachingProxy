@@ -33,3 +33,4 @@ warning: pass unit test only means it behaves right when using it right.
 3.terrible exception handler, no work on it, out of time
 4.no management of unit test, although I tried to write some in each main
 5.I think my code only supply basic gurantee, I handle all system call failure(connection, send, receive, accept), HTTP503,ERROR HTTP 502 ERROR, HTTP 400 ERROR.
+6. You can find some unit test cases in each cpp, I am out of time to manage them
