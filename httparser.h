@@ -1,7 +1,6 @@
 #ifndef __HTTPARSER_H__
 #define __HTTPARSER_H__
 #include "helper.h"
-#include <iostream>
 #include <map>
 #include <string>
 #include <vector>

@@ -1,5 +1,4 @@
 #include "proxy.h"
-
 std::vector<char> getRevalidRequest(HTTPRSPNSParser &httprspnsparer,
                                     HTTParser &httparser) {
 
@@ -17,24 +16,6 @@ std::vector<char> getRevalidRequest(HTTPRSPNSParser &httprspnsparer,
  * revalidation
  * status: untested
  */
-/*std::vector<char> revalidation(HTTPRSPNSParser &httprspnsparser,
-                               HTTParser &httparser, Cache &cache,
-                               std::string &url) {
-  std::string hostname = httparser.getHostName();
-  std::string port = httparser.getHostPort();
-  Client client(hostname.c_str(),
-                port.c_str()); // have to check success or not, if failed,
-                               // return 503,important
-  std::vector<char> validRequest =
-      getRevalidRequest(httprspnsparser, httparser);
-  client.Send(validRequest);
-  std::vector<char> HTTPResponse = client.recvServeResponse();
-  HTTPRSPNSParser validate(HTTPResponse);
-  if (validate.getStatusCode() == 304)
-    return httprspnsparser.getResponse();
-  cache.store(url, HTTPResponse);
-  return validate.getResponse();
-  }*/
 std::vector<char> Proxy::revalidation(HTTPRSPNSParser &httprspnsparser,
                                       HTTParser &httparser, Cache &cache) {
   std::vector<char> request = getRevalidRequest(httprspnsparser, httparser);
@@ -130,7 +111,6 @@ std::string getclientip(int newfd) {
     if (inet_ntop(AF_INET, &s->sin_addr, ip, sizeof ip) == NULL)
       throw std::string("inet_ntop");
   } catch (std::string e) {
-    std::cerr << "Error: " << e << " failed" << std::endl;
   }
   return std::string(ip);
 }
@@ -263,8 +243,7 @@ void Proxy::CONNECT_handler(HTTParser &httparser, int newfd) {
  */
 int Proxy::accNewRequest() {
   int newfd = server.acceptNewConn();
-  if (newfd < 0)
-    std::cerr << "Fail to accept a new request\n";
+  // if (newfd < 0)
   return newfd;
 }
 
@@ -295,7 +274,6 @@ void Proxy::handler(int newfd) {
       POST_handler(httparser, newfd);
 
   } catch (std::string e) {
-    std::cerr << e << std::endl;
   }
 }
 Proxy::Proxy(int requestid) : server(), log(requestid) {}

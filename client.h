@@ -2,7 +2,6 @@
 #define __CLIENT_H__
 #include <arpa/inet.h>
 #include <cstring>
-#include <iostream>
 #include <netdb.h>
 #include <stdlib.h>
 #include <string>

@@ -7,7 +7,6 @@
 #include "httprspnsparser.h"
 #include "log.h"
 #include "server.h"
-#include <iostream>
 #define NOTINCACHE 1
 #define EXPIRED 2
 #define NEEDVALIDATE 3

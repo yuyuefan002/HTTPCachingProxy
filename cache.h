@@ -2,7 +2,6 @@
 #define __CACHE_H__
 #include "helper.h"
 #include <fstream>
-#include <iostream>
 #include <sstream>
 #include <string>
 #include <sys/stat.h>

@@ -83,7 +83,6 @@ int HTTParser::verifyHeader() {
     if (headers.find("host") == headers.end())
       throw std::string("host");
   } catch (std::string e) {
-    std::cerr << "missing " << e << std::endl;
     errnum = 1;
     return -1;
   }

@@ -78,7 +78,6 @@ std::vector<char> Client::recvall(int fd) {
       msg.resize(index + MAXDATASIZE);
     nbytes = recv(fd, &msg.data()[index], MAXDATASIZE - 1, 0);
     if (nbytes == -1 && msg.empty()) {
-      std::cerr << "recv failed\n";
       break;
     } else if (nbytes <= 0) {
       break;

@@ -27,7 +27,6 @@ Server::Server(const char *p) : port(p) {
     if (listen(listener, 100) == -1)
       throw std::string("listen");
   } catch (std::string e) {
-    std::cerr << "Error: " << e << " failed" << std::endl;
     freeaddrinfo(host_info_list);
     throw std::string("server init");
   }
