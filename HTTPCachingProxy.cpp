@@ -39,9 +39,9 @@ int main(int argc, char **argv) {
   while (1) {
     int newfd = proxy.accNewRequest();
     std::pair<int, int> *args = new std::pair<int, int>(newfd, requestid++);
-    // std::thread t = std::thread(proxy_func, args);
-    // t.detach();
-    proxy_func(args);
+    std::thread t = std::thread(proxy_func, args);
+    t.detach();
+    // proxy_func(args);
   }
   return EXIT_SUCCESS;
 }

@@ -18,7 +18,10 @@ private:
   Server server;
   Log log;
   std::vector<char> handlebyCache(Cache &cache, HTTParser &httparser);
-  std::vector<char> fetchNewResponse(Cache &cache, HTTParser &httparser);
+  std::vector<char> fetchNewResponse(Cache &cache, HTTParser &httparser,
+                                     const std::vector<char> &request);
+  std::vector<char> revalidation(HTTPRSPNSParser &httprspnsparser,
+                                 HTTParser &httparser, Cache &cache);
   void GET_handler(HTTParser &httparser, int newfd);
   void POST_handler(HTTParser &httparser, int newfd);
   void CONNECT_handler(HTTParser &httparser, int newfd);

@@ -17,7 +17,7 @@ std::vector<char> getRevalidRequest(HTTPRSPNSParser &httprspnsparer,
  * revalidation
  * status: untested
  */
-std::vector<char> revalidation(HTTPRSPNSParser &httprspnsparser,
+/*std::vector<char> revalidation(HTTPRSPNSParser &httprspnsparser,
                                HTTParser &httparser, Cache &cache,
                                std::string &url) {
   std::string hostname = httparser.getHostName();
@@ -34,6 +34,11 @@ std::vector<char> revalidation(HTTPRSPNSParser &httprspnsparser,
     return httprspnsparser.getResponse();
   cache.store(url, HTTPResponse);
   return validate.getResponse();
+  }*/
+std::vector<char> Proxy::revalidation(HTTPRSPNSParser &httprspnsparser,
+                                      HTTParser &httparser, Cache &cache) {
+  std::vector<char> request = getRevalidRequest(httprspnsparser, httparser);
+  return fetchNewResponse(cache, httparser, request);
 }
 
 /*
@@ -63,7 +68,7 @@ std::vector<char> Proxy::handlebyCache(Cache &cache, HTTParser &httparser) {
     needRevalid = true;
   }
   if (needRevalid)
-    return revalidation(httprspnsparser, httparser, cache, url);
+    return revalidation(httprspnsparser, httparser, cache);
   // valid
   log.checkCache(VALID, "");
   return httprspnsparser.getResponse();
@@ -72,7 +77,8 @@ std::vector<char> Proxy::handlebyCache(Cache &cache, HTTParser &httparser) {
  * fetchNewresponse
  * ask original server for new response
  */
-std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser) {
+std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser,
+                                          const std::vector<char> &request) {
   std::string url = httparser.getURL();
   std::string hostname = httparser.getHostName();
   std::string port = httparser.getHostPort();
@@ -83,7 +89,7 @@ std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser) {
   if (client.getError() == 1) {
     return HTTP503();
   }
-  client.Send(httparser.getRequest());
+  client.Send(request);
   log.reqFromServer(statusLine, hostname);
   std::vector<char> HTTPResponse = client.recvServeResponse();
   HTTPRSPNSParser httprspnsparser(HTTPResponse);
@@ -100,6 +106,11 @@ std::vector<char> Proxy::fetchNewResponse(Cache &cache, HTTParser &httparser) {
       log.notCacheable(httprspnsparser.whyBad4Cache());
     else if (!httparser.good4Cache())
       log.notCacheable(httparser.whyBad4Cache());
+  }
+  if (httprspnsparser.getStatusCode() == 304) {
+    std::vector<char> HTTPResponse = cache.read(url);
+    HTTPRSPNSParser respinCache(HTTPResponse);
+    return respinCache.getResponse();
   }
   return HTTPResponse;
 }
@@ -134,7 +145,7 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
   try {
     HTTPResponse = handlebyCache(cache, httparser);
     if (HTTPResponse.empty()) {
-      HTTPResponse = fetchNewResponse(cache, httparser);
+      HTTPResponse = fetchNewResponse(cache, httparser, httparser.getRequest());
     }
     std::vector<char> pattern{'\r', '\n', '\r', '\n'};
     if (std::search(HTTPResponse.begin(), HTTPResponse.end(), pattern.begin(),
