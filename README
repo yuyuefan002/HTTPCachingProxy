@@ -21,13 +21,15 @@ How to handle GET?
 	      	     yes /      \no
 		        /        \
 		 Still fresh?  ask origin server
-              yes/      \no            |
-	        /        \             |
-	   response    revalidate    Caccheable?
-	           304/     \others  yes/    \no
+              yes/      \no            \
+	        /        \              \
+	   response    revalidate      Caccheable?
+	           304/     \200     yes/    \no
 		     /       \         /      \
-		  response refetch response&  response
-			             store
+		  response response response&  response
+		  from     	    store
+		  cache
+		  
 How to handle POST?
 
         browser send request---->send to origin server---->receive from origin server
