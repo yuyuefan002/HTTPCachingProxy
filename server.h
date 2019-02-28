@@ -1,5 +1,7 @@
 #ifndef __SERVER_H__
 #define __SERVER_H__
+#include "helper.h"
+#include "httparser.h"
 #include <algorithm>
 #include <arpa/inet.h>
 #include <cstring>

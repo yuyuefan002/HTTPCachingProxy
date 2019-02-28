@@ -169,7 +169,11 @@ std::vector<char> HTTParser::getRequest() {
 }
 
 std::string HTTParser::getMethod() { return method; }
-
+int HTTParser::getContentLen() {
+  if (headers.find("content-length") != headers.end())
+    return stoi(headers["content-length"]);
+  return 0;
+}
 std::string HTTParser::getURL() { return path; } // valgrind clean
 
 std::string HTTParser::getStatusLine() { return statusline; }

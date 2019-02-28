@@ -31,11 +31,11 @@ int main(int argc, char **argv) {
   Proxy proxy(argv[1]);
   createIndex(PATH);
   // become a daemon
-  daemon(0, 0);
+  /*  daemon(0, 0);
   umask(0);
   pid_t pid = fork();
   if (pid < 0)
-    std::cerr << "fail to fork" << std::endl;
+  std::cerr << "fail to fork" << std::endl;*/
   while (1) {
     int newfd = proxy.accNewRequest();
     std::pair<int, int> *args = new std::pair<int, int>(newfd, requestid++);

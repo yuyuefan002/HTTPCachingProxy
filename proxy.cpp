@@ -127,9 +127,7 @@ void Proxy::GET_handler(HTTParser &httparser, int newfd) {
     if (HTTPResponse.empty()) {
       HTTPResponse = fetchNewResponse(cache, httparser, httparser.getRequest());
     }
-    std::vector<char> pattern{'\r', '\n', '\r', '\n'};
-    if (std::search(HTTPResponse.begin(), HTTPResponse.end(), pattern.begin(),
-                    pattern.end()) == HTTPResponse.end()) {
+    if (!helper.containNewLine(HTTPResponse)) {
       server.sendData(newfd, HTTP502());
       log.respondClient(HTTP502());
       return;
@@ -249,20 +247,21 @@ int Proxy::accNewRequest() {
 
 bool request_is_imcomplete(HTTParser &httparser,
                            std::vector<char> &HTTPRequest) {
-  std::vector<char> pattern{'\r', '\n', '\r', '\n'};
+  Helper helper;
   if (httparser.getMethod() != "POST" &&
-      std::search(HTTPRequest.begin(), HTTPRequest.end(), pattern.begin(),
-                  pattern.end()) == HTTPRequest.end()) {
+      (!helper.containNewLine(HTTPRequest) || httparser.errorDetection() == 1))
     return true;
-  }
   return false;
 }
 void Proxy::handler(int newfd) {
   try {
-    std::vector<char> HTTPRequest = server.receiveData(newfd);
+    std::vector<char> HTTPRequest = server.receiveHTTPRequest(newfd);
+
+    // std::vector<char> HTTPRequest = server.receiveData(newfd);
     HTTParser httparser(HTTPRequest);
     if (request_is_imcomplete(httparser, HTTPRequest)) {
       server.sendData(newfd, HTTP400());
+      log.respondClient(HTTP400());
       return;
     }
     log.newRequest(httparser.getStatusLine(), getclientip(newfd));

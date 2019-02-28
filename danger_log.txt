@@ -26,3 +26,9 @@ warning: pass unit test only means it behaves right when using it right.
 2/24
 1.in tunnel mode, need request id to log.
 2.reasons of not cacheable is not necessarily "private", "no-cache", or "no-store". could also be max-age is 0.
+
+2/27
+1.duplicate code in fetching response from server
+2.messy logic handle response in cache
+3.terrible exception handler, no work on it, out of time
+4.no management of unit test, although I tried to write some in each main

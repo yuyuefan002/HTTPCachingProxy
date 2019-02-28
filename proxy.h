@@ -2,6 +2,7 @@
 #define __PROXY_H__
 #include "cache.h"
 #include "client.h"
+#include "helper.h"
 #include "http.h"
 #include "httparser.h"
 #include "httprspnsparser.h"
@@ -15,6 +16,7 @@ typedef struct sockaddr sockaddr;
 class Proxy {
 private:
   Server server;
+  Helper helper;
   Log log;
   std::vector<char> handlebyCache(Cache &cache, HTTParser &httparser);
   std::vector<char> fetchNewResponse(Cache &cache, HTTParser &httparser,

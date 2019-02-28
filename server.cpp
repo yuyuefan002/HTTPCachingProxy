@@ -45,9 +45,9 @@ int Server::acceptNewConn() {
 std::vector<char> Server::recvall(int fd) {
   vector<char> msg;
   size_t index = 0;
-  std::vector<char> pattern{'\r', '\n', '\r', '\n'};
-  while (std::search(msg.begin(), msg.end(), pattern.begin(), pattern.end()) ==
-         msg.end()) {
+  int contentlen = 0;
+  Helper helper;
+  while (!helper.containNewLine(msg)) {
     if (msg.size() < index + MAXDATASIZE)
       msg.resize(index + MAXDATASIZE);
     int nbytes;
@@ -55,6 +55,29 @@ std::vector<char> Server::recvall(int fd) {
       return std::vector<char>();
     } else {
       index += nbytes;
+    }
+  }
+  msg.resize(index);
+  HTTParser httparser(msg);
+  contentlen = httparser.getContentLen();
+  if (contentlen != 0) {
+    std::vector<char> pattern{'\r', '\n', '\r', '\n'};
+    auto it =
+        std::search(msg.begin(), msg.end(), pattern.begin(), pattern.end()) + 4;
+    while (it != msg.end()) {
+      --contentlen;
+      ++it;
+    }
+    while (contentlen) {
+      if (msg.size() < index + MAXDATASIZE)
+        msg.resize(index + MAXDATASIZE);
+      int nbytes;
+      if ((nbytes = recv(fd, &msg.data()[index], MAXDATASIZE - 1, 0)) <= 0) {
+        break;
+      } else {
+        index += nbytes;
+        contentlen -= nbytes;
+      }
     }
   }
   msg.resize(index);

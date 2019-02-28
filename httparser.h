@@ -36,6 +36,7 @@ public:
   std::string getURL();
   std::string getStatusLine();
   std::string whyBad4Cache();
+  int getContentLen();
   bool good4Cache();
   bool mustRevalidate();
 };

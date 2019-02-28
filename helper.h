@@ -1,5 +1,6 @@
 #ifndef __HELPER_H__
 #define __HELPER_H__
+#include <algorithm>
 #include <ctime>
 #include <map>
 #include <string>
@@ -17,5 +18,6 @@ public:
                                 std::vector<char>::iterator begin);
   size_t HTTPAge(std::string date);
   struct tm strtotm(std::string date);
+  bool containNewLine(const std::vector<char> &str);
 };
 #endif

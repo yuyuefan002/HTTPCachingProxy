@@ -161,6 +161,15 @@ struct tm Helper::strtotm(std::string date) {
   return time;
 }
 
+bool Helper::containNewLine(const std::vector<char> &str) {
+  std::vector<char> pattern{'\r', '\n', '\r', '\n'};
+  if (std::search(str.begin(), str.end(), pattern.begin(), pattern.end()) ==
+      str.end()) {
+    return false;
+  }
+  return true;
+}
+
 /*
 int main() {
   Helper helper;
